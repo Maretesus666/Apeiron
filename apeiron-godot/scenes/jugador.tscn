@@ -2,14 +2,18 @@
 
 [ext_resource type="Script" uid="uid://deo2rgxhri75e" path="res://scripts/jugador.gd" id="1_st4uy"]
 [ext_resource type="Texture2D" uid="uid://dsqmf3qkp4ovd" path="res://assets/sprites/nave.png" id="1_xbmdn"]
-[ext_resource type="PackedScene" uid="uid://bul724b2bfmo1" path="res://scenes/bala.tscn" id="3_r2ihm"]
+[ext_resource type="PackedScene" uid="uid://k3mgp21netck" path="res://scenes/bala.tscn" id="3_r2ihm"]
 [ext_resource type="Script" uid="uid://chch6oeolhd3b" path="res://scripts/camera_2d.gd" id="4_k64kw"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_y38cv"]
-radius = 200.0
+radius = 270.1851
 
-[node name="jugador" type="CharacterBody2D"]
+[node name="jugador" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_st4uy")
+
+[node name="Bala" parent="." instance=ExtResource("3_r2ihm")]
+scale = Vector2(0.1, 0.1)
+script = null
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 2
@@ -22,13 +26,6 @@ texture = ExtResource("1_xbmdn")
 position = Vector2(1.19209e-07, 5.96046e-08)
 scale = Vector2(0.1, 0.1)
 shape = SubResource("CircleShape2D_y38cv")
-
-[node name="Marker2D" type="Marker2D" parent="."]
-position = Vector2(-58, -48)
-scale = Vector2(0.1, 0.1)
-
-[node name="Bala" parent="." instance=ExtResource("3_r2ihm")]
-scale = Vector2(0.1, 0.1)
 
 [node name="PuntoDisparo" type="Node2D" parent="."]
 position = Vector2(47, 0)

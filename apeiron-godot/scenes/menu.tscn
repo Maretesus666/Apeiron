@@ -1,10 +1,10 @@
 [gd_scene load_steps=9 format=3 uid="uid://bcyxi72ks4vie"]
 
 [ext_resource type="FontFile" uid="uid://bjkvctpyibltk" path="res://assets/fonts/ultrakill.ttf" id="1_ckuiw"]
-[ext_resource type="Script" path="res://scenes/menu.gd" id="1_kidjv"]
-[ext_resource type="Script" path="res://scripts/titulo_ola.gd" id="2_6tvaa"]
-[ext_resource type="Script" path="res://scripts/titulo.gd" id="2_jj1jh"]
-[ext_resource type="Shader" path="res://shaders/menu.gdshader" id="3_usg53"]
+[ext_resource type="Script" uid="uid://chihlynhm4o78" path="res://scripts/menu.gd" id="1_kidjv"]
+[ext_resource type="Script" uid="uid://cm7y5qhy54j7n" path="res://scripts/titulo_ola.gd" id="2_6tvaa"]
+[ext_resource type="Script" uid="uid://b0joy2nsrr6r3" path="res://scripts/titulo.gd" id="2_jj1jh"]
+[ext_resource type="Shader" uid="uid://cvu8ucill03dy" path="res://shaders/menu.gdshader" id="3_usg53"]
 [ext_resource type="StyleBox" uid="uid://vcrduyxrmcu" path="res://shaders/transparente.tres" id="5_5s8gr"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fl2qg"]
@@ -96,9 +96,9 @@ layout_mode = 2
 theme_override_colors/icon_normal_color = Color(1, 0, 0, 1)
 theme_override_fonts/font = ExtResource("1_ckuiw")
 theme_override_font_sizes/font_size = 48
-theme_override_styles/hover_pressed = ExtResource("5_5s8gr")
-theme_override_styles/hover = ExtResource("5_5s8gr")
 theme_override_styles/normal = ExtResource("5_5s8gr")
+theme_override_styles/hover = ExtResource("5_5s8gr")
+theme_override_styles/hover_pressed = ExtResource("5_5s8gr")
 text = "JUGAR"
 autowrap_mode = 3
 icon_alignment = 1
@@ -111,9 +111,9 @@ layout_mode = 2
 theme_override_colors/icon_normal_color = Color(1, 0, 0, 1)
 theme_override_fonts/font = ExtResource("1_ckuiw")
 theme_override_font_sizes/font_size = 48
-theme_override_styles/hover_pressed = ExtResource("5_5s8gr")
-theme_override_styles/hover = ExtResource("5_5s8gr")
 theme_override_styles/normal = ExtResource("5_5s8gr")
+theme_override_styles/hover = ExtResource("5_5s8gr")
+theme_override_styles/hover_pressed = ExtResource("5_5s8gr")
 text = "OPCIONES"
 autowrap_mode = 3
 icon_alignment = 1
@@ -126,9 +126,9 @@ layout_mode = 2
 theme_override_colors/icon_normal_color = Color(1, 0, 0, 1)
 theme_override_fonts/font = ExtResource("1_ckuiw")
 theme_override_font_sizes/font_size = 48
-theme_override_styles/hover_pressed = ExtResource("5_5s8gr")
-theme_override_styles/hover = ExtResource("5_5s8gr")
 theme_override_styles/normal = ExtResource("5_5s8gr")
+theme_override_styles/hover = ExtResource("5_5s8gr")
+theme_override_styles/hover_pressed = ExtResource("5_5s8gr")
 text = "SALIR"
 autowrap_mode = 3
 icon_alignment = 1

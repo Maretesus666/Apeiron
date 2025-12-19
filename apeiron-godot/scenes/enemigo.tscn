@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://pu3q7pahxxq2"]
+
+[ext_resource type="Script" uid="uid://b5b5e1bslatle" path="res://scripts/enemigo.gd" id="1_hlx46"]
+[ext_resource type="Texture2D" uid="uid://cwqugk8wrh7st" path="res://assets/sprites/enemigo.png" id="2_1yqjy"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_pe0jf"]
+radius = 113.5
+height = 668.0
+
+[node name="Enemigo" type="Area2D"]
+script = ExtResource("1_hlx46")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_repeat = 1
+rotation = 1.5707964
+scale = Vector2(0.09, 0.09)
+texture = ExtResource("2_1yqjy")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(2.861023e-06, 7.1525574e-07)
+rotation = 1.5707964
+scale = Vector2(0.09, 0.09)
+shape = SubResource("CapsuleShape2D_pe0jf")

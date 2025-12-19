@@ -1,12 +1,26 @@
-[gd_scene load_steps=4 format=3 uid="uid://dn7ruopjurr62"]
+[gd_scene load_steps=6 format=3 uid="uid://dn7ruopjurr62"]
 
 [ext_resource type="Shader" uid="uid://cvu8ucill03dy" path="res://shaders/menu.gdshader" id="1_5evyv"]
 [ext_resource type="PackedScene" uid="uid://bcq45ypkaysta" path="res://scenes/jugador.tscn" id="1_svaqf"]
+[ext_resource type="Script" uid="uid://j7y4uc0ptpcw" path="res://scripts/enemy_spawner.gd" id="3_lnu2h"]
+
+[sub_resource type="GDScript" id="GDScript_lbhrr"]
+script/source = "extends Node2D
+
+
+var enemy_scene = preload(\"res://scenes/enemigo.tscn\") 
+
+func spawn_enemy(position: Vector2):
+	var enemy = enemy_scene.instantiate()
+	enemy.global_position = position
+	add_child(enemy)
+"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_70w4t"]
 shader = ExtResource("1_5evyv")
 
 [node name="Game" type="Node2D"]
+script = SubResource("GDScript_lbhrr")
 
 [node name="Fondo" type="ColorRect" parent="."]
 material = SubResource("ShaderMaterial_70w4t")
@@ -23,3 +37,6 @@ size_flags_vertical = 0
 color = Color(0, 0, 0, 1)
 
 [node name="Jugador" parent="." instance=ExtResource("1_svaqf")]
+
+[node name="EnemySpawner" type="Node2D" parent="."]
+script = ExtResource("3_lnu2h")
