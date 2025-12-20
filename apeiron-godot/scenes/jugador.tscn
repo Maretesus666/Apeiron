@@ -8,7 +8,7 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_y38cv"]
 radius = 270.1851
 
-[node name="jugador" type="CharacterBody2D" groups=["player"]]
+[node name="jugador" type="CharacterBody2D" groups=["player", "player_bullet"]]
 script = ExtResource("1_st4uy")
 
 [node name="Bala" parent="." instance=ExtResource("3_r2ihm")]
@@ -35,3 +35,5 @@ limit_smoothed = true
 position_smoothing_speed = 1.0
 rotation_smoothing_speed = 1.0
 script = ExtResource("4_k64kw")
+
+[node name="ThrusterParticles" type="CPUParticles2D" parent="."]

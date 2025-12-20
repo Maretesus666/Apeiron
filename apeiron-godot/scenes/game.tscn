@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://dn7ruopjurr62"]
+[gd_scene load_steps=7 format=3 uid="uid://dn7ruopjurr62"]
 
 [ext_resource type="Shader" uid="uid://cvu8ucill03dy" path="res://shaders/menu.gdshader" id="1_5evyv"]
 [ext_resource type="PackedScene" uid="uid://bcq45ypkaysta" path="res://scenes/jugador.tscn" id="1_svaqf"]
 [ext_resource type="Script" uid="uid://j7y4uc0ptpcw" path="res://scripts/enemy_spawner.gd" id="3_lnu2h"]
+[ext_resource type="Script" uid="uid://cja7mxo22kr21" path="res://scripts/hud.gd" id="4_lbhrr"]
 
 [sub_resource type="GDScript" id="GDScript_lbhrr"]
 script/source = "extends Node2D
@@ -40,3 +41,16 @@ color = Color(0, 0, 0, 1)
 
 [node name="EnemySpawner" type="Node2D" parent="."]
 script = ExtResource("3_lnu2h")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("4_lbhrr")
+
+[node name="HealthContainer" type="VBoxContainer" parent="HUD"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HealthLabel" type="Label" parent="HUD/HealthContainer"]
+layout_mode = 2
+
+[node name="HeartsContainer" type="HBoxContainer" parent="HUD/HealthContainer"]
+layout_mode = 2
