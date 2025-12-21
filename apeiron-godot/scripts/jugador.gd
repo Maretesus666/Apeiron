@@ -1,6 +1,9 @@
 extends CharacterBody2D
 
-@export var speed: float = 300.0
+@export var acceleration: float = 8000.0
+@export var max_speed: float = 4000.0
+@export var friction: float = 600.0
+@export var rotation_speed: float = 5.0
 @export var max_health: int = 5
 @export var shoot_shake_amount: float = 2.0
 @export var shoot_shake_duration: float = 0.1
@@ -24,33 +27,45 @@ func _ready():
 	health_changed.emit(current_health, max_health)
 
 func _physics_process(delta):
-	_handle_movement(delta)
-	_handle_rotation()
+	_handle_movement_with_acceleration(delta)
+	_handle_rotation(delta)
 	_update_thruster_particles()
 
 	if Input.is_action_just_pressed("shoot"):
 		_shoot()
 
-func _handle_movement(delta):
-	var dir = Vector2.ZERO
+func _handle_movement_with_acceleration(delta):
+	var input_dir = Vector2.ZERO
 
 	if Input.is_action_pressed("move_up"):
-		dir.y -= 1
+		input_dir.y -= 1
 	if Input.is_action_pressed("move_down"):
-		dir.y += 1
+		input_dir.y += 1
 	if Input.is_action_pressed("move_left"):
-		dir.x -= 1
+		input_dir.x -= 1
 	if Input.is_action_pressed("move_right"):
-		dir.x += 1
+		input_dir.x += 1
 
-	if dir.length() > 0:
-		dir = dir.normalized()
+	if input_dir.length() > 0:
+		input_dir = input_dir.normalized()
+		# Aplicar aceleración en la dirección del input
+		velocity += input_dir * acceleration * delta
+		
+		# Limitar velocidad máxima
+		if velocity.length() > max_speed:
+			velocity = velocity.normalized() * max_speed
+	else:
+		# Aplicar fricción cuando no hay input
+		if velocity.length() > friction * delta:
+			velocity -= velocity.normalized() * friction * delta
+		else:
+			velocity = Vector2.ZERO
 	
-	velocity = dir * speed
 	move_and_slide()
 
-func _handle_rotation():
-	look_at(get_global_mouse_position())
+func _handle_rotation(delta):
+	var target_rotation = get_global_mouse_position().angle_to_point(global_position) + PI
+	rotation = lerp_angle(rotation, target_rotation, rotation_speed * delta)
 
 func _shoot():
 	var newBullet = bullet.instantiate()
@@ -58,14 +73,12 @@ func _shoot():
 	newBullet.global_position = puntoDisparo.global_position
 	get_parent().add_child(newBullet)
 	
-	# Efecto de temblor al disparar
 	apply_shake(shoot_shake_amount, shoot_shake_duration)
 
 func take_damage(amount: int):
 	current_health -= amount
 	health_changed.emit(current_health, max_health)
 	
-	# Efectos visuales de daño
 	spawn_damage_particles()
 	flash_damage()
 	apply_shake(damage_shake_amount, damage_shake_duration)
@@ -155,8 +168,6 @@ func setup_thruster_particles():
 	thruster_particles.scale_amount_min = 1.5
 	thruster_particles.scale_amount_max = 3
 	thruster_particles.color = Color(1, 0.6, 0.2)
-	
-	# Posicionar las partículas detrás de la nave
 	thruster_particles.position = Vector2(-30, 0)
 
 func _update_thruster_particles():
@@ -164,8 +175,12 @@ func _update_thruster_particles():
 		if not thruster_particles.emitting:
 			thruster_particles.emitting = true
 		
-		# Ajustar dirección de las partículas según el movimiento
 		var particle_direction = -velocity.normalized()
 		thruster_particles.direction = particle_direction
+		
+		# Intensidad basada en velocidad
+		var intensity = velocity.length() / max_speed
+		thruster_particles.initial_velocity_min = 100 * intensity
+		thruster_particles.initial_velocity_max = 150 * intensity
 	else:
 		thruster_particles.emitting = false

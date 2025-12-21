@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://c01db0i7tgm2d"]
+
+[node name="Hub" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+current_tab = 0
+
+[node name="Clicker" type="Control" parent="TabContainer"]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Clicker"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="PointsLabel" type="Label" parent="TabContainer/Clicker/VBoxContainer"]
+layout_mode = 2
+
+[node name="ClickButton" type="Button" parent="TabContainer/Clicker/VBoxContainer"]
+layout_mode = 2
+
+[node name="UpgradesContainer" type="VBoxContainer" parent="TabContainer/Clicker/VBoxContainer"]
+layout_mode = 2
+
+[node name="StartGameButton" type="Button" parent="TabContainer/Clicker/VBoxContainer"]
+layout_mode = 2
+
+[node name="Juego" type="Control" parent="TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Juego"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="InfoLabel" type="Label" parent="TabContainer/Juego/VBoxContainer"]
+layout_mode = 2
+
+[node name="PlayButton" type="Button" parent="TabContainer/Juego/VBoxContainer"]
+layout_mode = 2
