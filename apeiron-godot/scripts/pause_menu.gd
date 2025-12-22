@@ -1,11 +1,12 @@
 extends CanvasLayer
 
-@onready var pause_panel = $PausePanel
-@onready var title_label = $PausePanel/VBoxContainer/TitleLabel
-@onready var score_label = $PausePanel/VBoxContainer/ScoreLabel
-@onready var resume_button = $PausePanel/VBoxContainer/ResumeButton
-@onready var restart_button = $PausePanel/VBoxContainer/RestartButton
-@onready var menu_button = $PausePanel/VBoxContainer/MenuButton
+# Cambiar los nombres para que coincidan con tu escena
+@onready var pause_panel = $Panel  # ← CAMBIO: Tu nodo se llama Panel, no PausePanel
+@onready var title_label = $Panel/VBoxContainer/TitleLabel
+@onready var score_label = $Panel/VBoxContainer/ScoreLabel
+@onready var resume_button = $Panel/VBoxContainer/ResumeButton
+@onready var restart_button = $Panel/VBoxContainer/RestartButton
+@onready var menu_button = $Panel/VBoxContainer/MenuButton
 
 var is_paused = false
 var is_game_over = false
@@ -63,4 +64,4 @@ func _on_restart_button_pressed():
 
 func _on_menu_button_pressed():
 	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	get_tree().change_scene_to_file("res://scenes/Hub.tscn")  # ← CAMBIO: Ir a Hub en vez de menu

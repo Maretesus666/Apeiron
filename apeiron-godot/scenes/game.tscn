@@ -73,6 +73,16 @@ layout_mode = 2
 [node name="HeartsContainer" type="HBoxContainer" parent="HUD/HealthContainer"]
 layout_mode = 2
 
+[node name="ScoreContainer" type="VBoxContainer" parent="HUD"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="ScoreLabel" type="Label" parent="HUD/ScoreContainer"]
+layout_mode = 2
+
+[node name="ComboLabel" type="Label" parent="HUD/ScoreContainer"]
+layout_mode = 2
+
 [node name="PauseMenu" type="CanvasLayer" parent="."]
 script = ExtResource("6_u5sy4")
 
@@ -138,6 +148,6 @@ theme_override_fonts/font = ExtResource("7_u5sy4")
 theme_override_font_sizes/font_size = 64
 text = "VOLVER AL MENU"
 
-[connection signal="pressed" from="PauseMenu/Panel/VBoxContainer/ResumeButton" to="." method="_on_resume_button_pressed"]
-[connection signal="pressed" from="PauseMenu/Panel/VBoxContainer/RestartButton" to="." method="_on_restart_button_pressed"]
-[connection signal="pressed" from="PauseMenu/Panel/VBoxContainer/MenuButton" to="." method="_on_menu_button_pressed"]
+[connection signal="pressed" from="PauseMenu/Panel/VBoxContainer/ResumeButton" to="PauseMenu" method="_on_resume_button_pressed"]
+[connection signal="pressed" from="PauseMenu/Panel/VBoxContainer/RestartButton" to="PauseMenu" method="_on_restart_button_pressed"]
+[connection signal="pressed" from="PauseMenu/Panel/VBoxContainer/MenuButton" to="PauseMenu" method="_on_menu_button_pressed"]

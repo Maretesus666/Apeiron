@@ -78,5 +78,5 @@ theme_override_font_sizes/font_size = 64
 text = "Play"
 
 [connection signal="pressed" from="TabContainer/Clicker/VBoxContainer/ClickButton" to="." method="_on_click_button_pressed"]
-[connection signal="pressed" from="TabContainer/Clicker/VBoxContainer/StartGameButton" to="." method="_on_start_game_button_pressed"]
+[connection signal="pressed" from="TabContainer/Clicker/VBoxContainer/StartGameButton" to="TabContainer/Clicker" method="_on_start_game_button_pressed"]
 [connection signal="pressed" from="TabContainer/Juego/VBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]

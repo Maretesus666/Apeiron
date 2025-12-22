@@ -1,61 +1,90 @@
 extends Area2D
 
 # Configuración del enemigo
-@export var speed = 150.0  # Velocidad de movimiento
-@export var health = 3  # Vida del enemigo
-@export var damage = 1  # Daño que causa al jugador
+@export var speed = 150.0
+@export var health = 3
+@export var damage = 1
 
-var player = null  # Referencia al jugador
+var player = null
 
 func _ready():
-	# Conectar señales
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
-	
-	# Buscar al jugador en la escena
 	player = get_tree().get_first_node_in_group("player")
 
 func _process(delta):
 	if player:
-		# Calcular dirección hacia el jugador
 		var direction = (player.global_position - global_position).normalized()
-		
-		# Mover hacia el jugador
 		global_position += direction * speed * delta
-		
-		# Opcional: rotar el enemigo hacia el jugador
 		rotation = direction.angle()
 
 func take_damage(amount: int):
 	health -= amount
-	
-	# Efecto visual opcional (parpadeo)
 	flash_effect()
+	spawn_hit_particles()
 	
 	if health <= 0:
 		die()
 
 func die():
-	# Aquí puedes añadir efectos de muerte
-	# Por ejemplo: explosión, sonido, partículas
-	queue_free()  # Eliminar el enemigo
+	spawn_death_particles()
+	
+	# Dar puntos al jugador - VERIFICAR que ScoreManager exista
+	if ScoreManager:
+		ScoreManager.add_score(10)
+	
+	queue_free()
 
 func flash_effect():
-	# Efecto de parpadeo al recibir daño
-	modulate = Color(1, 0, 0)  # Rojo
+	modulate = Color(1, 0, 0)
 	await get_tree().create_timer(0.1).timeout
-	modulate = Color(1, 1, 1)  # Volver a normal
+	modulate = Color(1, 1, 1)
+
+func spawn_hit_particles():
+	var particles = CPUParticles2D.new()
+	particles.global_position = global_position
+	particles.emitting = true
+	particles.one_shot = true
+	particles.amount = 8
+	particles.lifetime = 0.5
+	particles.explosiveness = 1.0
+	particles.spread = 180
+	particles.initial_velocity_min = 100
+	particles.initial_velocity_max = 200
+	particles.scale_amount_min = 2
+	particles.scale_amount_max = 4
+	particles.color = Color(1, 0.3, 0.1)
+	get_tree().root.add_child(particles)
+	
+	await get_tree().create_timer(particles.lifetime).timeout
+	particles.queue_free()
+
+func spawn_death_particles():
+	var particles = CPUParticles2D.new()
+	particles.global_position = global_position
+	particles.emitting = true
+	particles.one_shot = true
+	particles.amount = 20
+	particles.lifetime = 0.8
+	particles.explosiveness = 1.0
+	particles.spread = 180
+	particles.initial_velocity_min = 150
+	particles.initial_velocity_max = 300
+	particles.scale_amount_min = 3
+	particles.scale_amount_max = 6
+	particles.color = Color(1, 0.5, 0)
+	get_tree().root.add_child(particles)
+	
+	await get_tree().create_timer(particles.lifetime).timeout
+	particles.queue_free()
 
 func _on_body_entered(body):
-	# Si choca con el jugador
 	if body.is_in_group("player"):
-		# Aquí puedes hacer daño al jugador
 		if body.has_method("take_damage"):
 			body.take_damage(damage)
-		die()  # El enemigo muere al chocar
+		die()
 
 func _on_area_entered(area):
-	# Si es una bala del jugador
 	if area.is_in_group("player_bullet"):
 		take_damage(1)
-		area.queue_free()  # Destruir la bala
+		area.queue_free()
