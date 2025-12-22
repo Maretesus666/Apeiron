@@ -41,7 +41,11 @@ script = SubResource("GDScript_lbhrr")
 [node name="BackgroundGenerator" type="Node2D" parent="."]
 script = ExtResource("1_p57ef")
 
-[node name="Fondo" type="ColorRect" parent="."]
+[node name="FondoGenerado" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="Fondo" type="ColorRect" parent="FondoGenerado"]
+z_index = -1
 material = SubResource("ShaderMaterial_70w4t")
 anchors_preset = 15
 anchor_right = 1.0
@@ -74,8 +78,9 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="ScoreContainer" type="VBoxContainer" parent="HUD"]
+offset_top = 32.0
 offset_right = 40.0
-offset_bottom = 40.0
+offset_bottom = 82.0
 
 [node name="ScoreLabel" type="Label" parent="HUD/ScoreContainer"]
 layout_mode = 2
@@ -84,9 +89,11 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="PauseMenu" type="CanvasLayer" parent="."]
+process_mode = 3
 script = ExtResource("6_u5sy4")
 
 [node name="Panel" type="Panel" parent="PauseMenu"]
+process_mode = 3
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -100,6 +107,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu/Panel"]
+process_mode = 3
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -114,6 +122,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TitleLabel" type="Label" parent="PauseMenu/Panel/VBoxContainer"]
+process_mode = 3
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("7_u5sy4")
@@ -121,6 +130,7 @@ theme_override_font_sizes/font_size = 64
 text = "JUEGO PAUSADO"
 
 [node name="ScoreLabel" type="Label" parent="PauseMenu/Panel/VBoxContainer"]
+process_mode = 3
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("7_u5sy4")
@@ -128,6 +138,7 @@ theme_override_font_sizes/font_size = 64
 text = "PUNTOS:"
 
 [node name="ResumeButton" type="Button" parent="PauseMenu/Panel/VBoxContainer"]
+process_mode = 3
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("7_u5sy4")
@@ -135,6 +146,7 @@ theme_override_font_sizes/font_size = 64
 text = "CONTINUAR"
 
 [node name="RestartButton" type="Button" parent="PauseMenu/Panel/VBoxContainer"]
+process_mode = 3
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("7_u5sy4")
@@ -142,6 +154,7 @@ theme_override_font_sizes/font_size = 64
 text = "REINICIAR"
 
 [node name="MenuButton" type="Button" parent="PauseMenu/Panel/VBoxContainer"]
+process_mode = 3
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("7_u5sy4")
