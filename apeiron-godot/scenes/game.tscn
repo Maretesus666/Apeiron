@@ -1,9 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://dn7ruopjurr62"]
+[gd_scene load_steps=10 format=3 uid="uid://dn7ruopjurr62"]
 
 [ext_resource type="Shader" uid="uid://cvu8ucill03dy" path="res://shaders/menu.gdshader" id="1_5evyv"]
+[ext_resource type="Script" uid="uid://nn6rx2sec51g" path="res://scripts/background_generator.gd" id="1_p57ef"]
 [ext_resource type="PackedScene" uid="uid://bcq45ypkaysta" path="res://scenes/jugador.tscn" id="1_svaqf"]
 [ext_resource type="Script" uid="uid://j7y4uc0ptpcw" path="res://scripts/enemy_spawner.gd" id="3_lnu2h"]
 [ext_resource type="Script" uid="uid://cja7mxo22kr21" path="res://scripts/hud.gd" id="4_lbhrr"]
+[ext_resource type="Script" uid="uid://chcvjb21vhfgy" path="res://scripts/pause_menu.gd" id="6_u5sy4"]
+[ext_resource type="FontFile" uid="uid://bjkvctpyibltk" path="res://assets/fonts/ultrakill.ttf" id="7_u5sy4"]
 
 [sub_resource type="GDScript" id="GDScript_lbhrr"]
 script/source = "extends Node2D
@@ -15,6 +18,18 @@ func spawn_enemy(position: Vector2):
 	var enemy = enemy_scene.instantiate()
 	enemy.global_position = position
 	add_child(enemy)
+
+
+func _on_resume_button_pressed() -> void:
+	pass # Replace with function body.
+
+
+func _on_restart_button_pressed() -> void:
+	pass # Replace with function body.
+
+
+func _on_menu_button_pressed() -> void:
+	pass # Replace with function body.
 "
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_70w4t"]
@@ -24,6 +39,7 @@ shader = ExtResource("1_5evyv")
 script = SubResource("GDScript_lbhrr")
 
 [node name="BackgroundGenerator" type="Node2D" parent="."]
+script = ExtResource("1_p57ef")
 
 [node name="Fondo" type="ColorRect" parent="."]
 material = SubResource("ShaderMaterial_70w4t")
@@ -58,29 +74,70 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="PauseMenu" type="CanvasLayer" parent="."]
+script = ExtResource("6_u5sy4")
 
 [node name="Panel" type="Panel" parent="PauseMenu"]
-offset_left = 458.0
-offset_top = -289.0
-offset_right = 498.0
-offset_bottom = -249.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -150.0
+offset_right = 200.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu/Panel"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -267.0
+offset_top = -162.5
+offset_right = 267.0
+offset_bottom = 162.5
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="TitleLabel" type="Label" parent="PauseMenu/Panel/VBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("7_u5sy4")
+theme_override_font_sizes/font_size = 64
+text = "JUEGO PAUSADO"
 
 [node name="ScoreLabel" type="Label" parent="PauseMenu/Panel/VBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("7_u5sy4")
+theme_override_font_sizes/font_size = 64
+text = "PUNTOS:"
 
-[node name="Button" type="Button" parent="PauseMenu/Panel/VBoxContainer"]
+[node name="ResumeButton" type="Button" parent="PauseMenu/Panel/VBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("7_u5sy4")
+theme_override_font_sizes/font_size = 64
+text = "CONTINUAR"
 
-[node name="Button2" type="Button" parent="PauseMenu/Panel/VBoxContainer"]
+[node name="RestartButton" type="Button" parent="PauseMenu/Panel/VBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("7_u5sy4")
+theme_override_font_sizes/font_size = 64
+text = "REINICIAR"
 
-[node name="Button3" type="Button" parent="PauseMenu/Panel/VBoxContainer"]
+[node name="MenuButton" type="Button" parent="PauseMenu/Panel/VBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("7_u5sy4")
+theme_override_font_sizes/font_size = 64
+text = "VOLVER AL MENU"
+
+[connection signal="pressed" from="PauseMenu/Panel/VBoxContainer/ResumeButton" to="." method="_on_resume_button_pressed"]
+[connection signal="pressed" from="PauseMenu/Panel/VBoxContainer/RestartButton" to="." method="_on_restart_button_pressed"]
+[connection signal="pressed" from="PauseMenu/Panel/VBoxContainer/MenuButton" to="." method="_on_menu_button_pressed"]

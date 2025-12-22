@@ -2,6 +2,8 @@ extends CanvasLayer
 
 @onready var health_label = $HealthContainer/HealthLabel
 @onready var hearts_container = $HealthContainer/HeartsContainer
+@onready var score_label = $ScoreContainer/ScoreLabel
+@onready var combo_label = $ScoreContainer/ComboLabel
 
 var heart_full = "♥"
 var heart_empty = "♡"
@@ -11,8 +13,26 @@ func _ready():
 	if player:
 		player.health_changed.connect(_on_player_health_changed)
 		player.player_died.connect(_on_player_died)
-		# Actualizar UI inicial
 		_on_player_health_changed(player.current_health, player.max_health)
+	
+	# Conectar al ScoreManager
+	if ScoreManager:
+		ScoreManager.score_changed.connect(_on_score_changed)
+		ScoreManager.combo_changed.connect(_on_combo_changed)
+		_on_score_changed(ScoreManager.score)
+		_on_combo_changed(ScoreManager.combo)
+
+func _on_score_changed(new_score: int):
+	if score_label:
+		score_label.text = "Puntos: " + str(new_score)
+
+func _on_combo_changed(new_combo: int):
+	if combo_label:
+		if new_combo > 1:
+			combo_label.visible = true
+			combo_label.text = "Combo x" + str(new_combo)
+		else:
+			combo_label.visible = false
 
 func _on_player_health_changed(current_health: int, max_health: int):
 	# Actualizar texto

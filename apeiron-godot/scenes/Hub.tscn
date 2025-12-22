@@ -1,4 +1,8 @@
-[gd_scene format=3 uid="uid://c01db0i7tgm2d"]
+[gd_scene load_steps=4 format=3 uid="uid://c01db0i7tgm2d"]
+
+[ext_resource type="Script" uid="uid://dntkixgnexo5x" path="res://scripts/hub.gd" id="1_wi61l"]
+[ext_resource type="Script" uid="uid://bh84wxh68ihog" path="res://scripts/clicker.gd" id="2_4qglb"]
+[ext_resource type="FontFile" uid="uid://bjkvctpyibltk" path="res://assets/fonts/ultrakill.ttf" id="2_7f5op"]
 
 [node name="Hub" type="Control"]
 layout_mode = 3
@@ -7,15 +11,21 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_wi61l")
 
 [node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 59.0
+offset_top = 6.0
+offset_right = 164.0
+offset_bottom = 46.0
+theme_override_fonts/font = ExtResource("2_7f5op")
+theme_override_font_sizes/font_size = 128
 current_tab = 0
 
 [node name="Clicker" type="Control" parent="TabContainer"]
 layout_mode = 2
+script = ExtResource("2_4qglb")
 metadata/_tab_index = 0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Clicker"]
@@ -25,15 +35,25 @@ offset_bottom = 40.0
 
 [node name="PointsLabel" type="Label" parent="TabContainer/Clicker/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_7f5op")
+theme_override_font_sizes/font_size = 64
+text = "Puntos:"
 
 [node name="ClickButton" type="Button" parent="TabContainer/Clicker/VBoxContainer"]
+texture_repeat = 1
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_7f5op")
+theme_override_font_sizes/font_size = 64
+text = "Click"
 
 [node name="UpgradesContainer" type="VBoxContainer" parent="TabContainer/Clicker/VBoxContainer"]
 layout_mode = 2
 
 [node name="StartGameButton" type="Button" parent="TabContainer/Clicker/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_7f5op")
+theme_override_font_sizes/font_size = 64
+text = "Start"
 
 [node name="Juego" type="Control" parent="TabContainer"]
 visible = false
@@ -47,6 +67,16 @@ offset_bottom = 40.0
 
 [node name="InfoLabel" type="Label" parent="TabContainer/Juego/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_7f5op")
+theme_override_font_sizes/font_size = 64
+text = "Jugar a las navee"
 
 [node name="PlayButton" type="Button" parent="TabContainer/Juego/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_7f5op")
+theme_override_font_sizes/font_size = 64
+text = "Play"
+
+[connection signal="pressed" from="TabContainer/Clicker/VBoxContainer/ClickButton" to="." method="_on_click_button_pressed"]
+[connection signal="pressed" from="TabContainer/Clicker/VBoxContainer/StartGameButton" to="." method="_on_start_game_button_pressed"]
+[connection signal="pressed" from="TabContainer/Juego/VBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]
