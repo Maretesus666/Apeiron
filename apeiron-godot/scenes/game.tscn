@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://dn7ruopjurr62"]
+[gd_scene load_steps=12 format=3 uid="uid://dn7ruopjurr62"]
 
 [ext_resource type="Shader" uid="uid://cvu8ucill03dy" path="res://shaders/menu.gdshader" id="1_5evyv"]
 [ext_resource type="Script" uid="uid://nn6rx2sec51g" path="res://scripts/background_generator.gd" id="1_p57ef"]
@@ -6,7 +6,9 @@
 [ext_resource type="Script" uid="uid://j7y4uc0ptpcw" path="res://scripts/enemy_spawner.gd" id="3_lnu2h"]
 [ext_resource type="Script" uid="uid://cja7mxo22kr21" path="res://scripts/hud.gd" id="4_lbhrr"]
 [ext_resource type="Script" uid="uid://chcvjb21vhfgy" path="res://scripts/pause_menu.gd" id="6_u5sy4"]
+[ext_resource type="Script" uid="uid://nnpxtjjuei6h" path="res://scenes/minimap.gd" id="7_0tnpc"]
 [ext_resource type="FontFile" uid="uid://bjkvctpyibltk" path="res://assets/fonts/ultrakill.ttf" id="7_u5sy4"]
+[ext_resource type="Script" uid="uid://bo5eagd8cxhd6" path="res://scripts/enemy_indicators.gd" id="8_vtaks"]
 
 [sub_resource type="GDScript" id="GDScript_lbhrr"]
 script/source = "extends Node2D
@@ -89,6 +91,25 @@ theme_override_fonts/font = ExtResource("7_u5sy4")
 [node name="ComboLabel" type="Label" parent="HUD/ScoreContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("7_u5sy4")
+
+[node name="CoinsContainer" type="HBoxContainer" parent="HUD"]
+offset_top = 8.0
+offset_right = 6.0
+offset_bottom = 48.0
+
+[node name="CoinsLabel" type="Label" parent="HUD/CoinsContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("7_u5sy4")
+
+[node name="Minimap" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("7_0tnpc")
+
+[node name="EnemyIndicators" type="CanvasLayer" parent="HUD"]
+script = ExtResource("8_vtaks")
 
 [node name="PauseMenu" type="CanvasLayer" parent="."]
 process_mode = 3

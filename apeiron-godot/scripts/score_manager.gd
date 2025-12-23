@@ -20,8 +20,13 @@ func _process(delta):
 			reset_combo()
 
 func add_score(points: int):
-	score += points * (1 + combo)
+	var multiplied_points = points * (1 + combo)
+	score += multiplied_points
 	score_changed.emit(score)
+	
+	# También agregar puntos al UpgradeManager (para poder comprar mejoras de clicker)
+	if UpgradeManager:
+		UpgradeManager.add_game_points(multiplied_points)
 	
 	# Actualizar combo
 	combo += 1

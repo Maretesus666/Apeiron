@@ -1,195 +1,222 @@
 extends Control
 
-@export var points_per_click: int = 1
-@export var points_per_second: int = 0
-@export var click_scale_amount: float = 1.2  # Cuánto crece al clickear
-@export var click_scale_duration: float = 0.1  # Duración de la animación
+@export var base_points_per_click: int = 1
+@export var click_scale_amount: float = 1.2
+@export var click_scale_duration: float = 0.1
 
-var total_points: int = 0
-var upgrades_data = {
-	"auto_clicker": {"cost": 10, "level": 0, "points_per_sec": 1},
-	"click_power": {"cost": 15, "level": 0, "bonus": 1},
-	"super_auto": {"cost": 50, "level": 0, "points_per_sec": 5}
-}
+var auto_click_timer: float = 0.0
 
 @onready var points_label = get_node_or_null("VBoxContainer/PointsLabel")
+@onready var game_points_label = get_node_or_null("VBoxContainer/GamePointsLabel")
 @onready var click_area = get_node_or_null("VBoxContainer/ClickArea")
-@onready var click_sprite = get_node_or_null("VBoxContainer/ClickArea/ClickSprite")
-@onready var start_game_button = get_node_or_null("VBoxContainer/StartGameButton")
 @onready var upgrades_container = get_node_or_null("VBoxContainer/UpgradesContainer")
-
-signal start_game_requested
+@onready var ship_upgrades_container = get_node_or_null("VBoxContainer/ShipUpgradesContainer")
+@onready var clicker_upgrades_container = get_node_or_null("VBoxContainer/ClickerUpgradesContainer")
 
 func _ready():
-	setup_click_area()
+	setup_ui()
+	connect_signals()
 	update_ui()
-	setup_upgrades()
-	
-	if start_game_button:
-		start_game_button.pressed.connect(_on_start_game_button_pressed)
 
-func setup_click_area():
-	# Si no existe el ClickArea, crearlo
+func setup_ui():
+	# Crear labels si no existen
+	var vbox = get_node_or_null("VBoxContainer")
+	if not vbox:
+		vbox = VBoxContainer.new()
+		vbox.name = "VBoxContainer"
+		add_child(vbox)
+	
+	if not points_label:
+		points_label = Label.new()
+		points_label.name = "PointsLabel"
+		vbox.add_child(points_label)
+		vbox.move_child(points_label, 0)
+	
+	if not game_points_label:
+		game_points_label = Label.new()
+		game_points_label.name = "GamePointsLabel"
+		vbox.add_child(game_points_label)
+		vbox.move_child(game_points_label, 1)
+	
+	# Configurar área de click
 	if not click_area:
 		click_area = TextureButton.new()
 		click_area.name = "ClickArea"
-		click_area.custom_minimum_size = Vector2(250, 250)
+		click_area.custom_minimum_size = Vector2(32, 32)
 		click_area.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-		click_area.ignore_texture_size = true
-		
-		# Crear sprite si no existe
-		if not click_sprite:
-			# Usar la imagen de la nave como sprite clickeable
-			var texture = load("res://assets/sprites/nave.png")
-			click_area.texture_normal = texture
-		
-		# Añadir al VBoxContainer si existe
-		var vbox = get_node_or_null("VBoxContainer")
-		if vbox:
-			# Insertar después de PointsLabel
-			vbox.add_child(click_area)
-			vbox.move_child(click_area, 1)
+		click_area.texture_normal = load("res://assets/sprites/nave.png")
+		vbox.add_child(click_area)
+		vbox.move_child(click_area, 2)
 	
-	# Conectar señal de click
 	if click_area and not click_area.pressed.is_connected(_on_click_area_pressed):
 		click_area.pressed.connect(_on_click_area_pressed)
+	
+	# Crear contenedores de upgrades
+	if not ship_upgrades_container:
+		var label = Label.new()
+		label.text = "=== MEJORAS DE NAVE (con puntos clicker) ==="
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vbox.add_child(label)
+		
+		ship_upgrades_container = VBoxContainer.new()
+		ship_upgrades_container.name = "ShipUpgradesContainer"
+		vbox.add_child(ship_upgrades_container)
+	
+	if not clicker_upgrades_container:
+		var label = Label.new()
+		label.text = "=== MEJORAS DE CLICKER (con puntos de juego) ==="
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vbox.add_child(label)
+		
+		clicker_upgrades_container = VBoxContainer.new()
+		clicker_upgrades_container.name = "ClickerUpgradesContainer"
+		vbox.add_child(clicker_upgrades_container)
+	
+	setup_upgrade_buttons()
+
+func connect_signals():
+	if UpgradeManager:
+		UpgradeManager.clicker_points_changed.connect(_on_points_changed)
+		UpgradeManager.game_points_changed.connect(_on_game_points_changed)
+		UpgradeManager.upgrade_purchased.connect(_on_upgrade_purchased)
+
+func setup_upgrade_buttons():
+	# Limpiar upgrades anteriores
+	for child in ship_upgrades_container.get_children():
+		child.queue_free()
+	for child in clicker_upgrades_container.get_children():
+		child.queue_free()
+	
+	# Crear botones para mejoras de nave
+	for upgrade_id in UpgradeManager.ship_upgrades.keys():
+		var button = create_upgrade_button(upgrade_id, "ship")
+		ship_upgrades_container.add_child(button)
+	
+	# Crear botones para mejoras de clicker
+	for upgrade_id in UpgradeManager.clicker_upgrades.keys():
+		var button = create_upgrade_button(upgrade_id, "clicker")
+		clicker_upgrades_container.add_child(button)
+
+func create_upgrade_button(upgrade_id: String, upgrade_type: String) -> Button:
+	var button = Button.new()
+	button.name = upgrade_id + "_button"
+	button.set_meta("upgrade_id", upgrade_id)
+	button.set_meta("upgrade_type", upgrade_type)
+	
+	if upgrade_type == "ship":
+		button.pressed.connect(_on_ship_upgrade_pressed.bind(upgrade_id))
+	else:
+		button.pressed.connect(_on_clicker_upgrade_pressed.bind(upgrade_id))
+	
+	update_button_text(button)
+	return button
+
+func update_button_text(button: Button):
+	var upgrade_id = button.get_meta("upgrade_id")
+	var upgrade_type = button.get_meta("upgrade_type")
+	
+	var upgrade_data
+	var cost
+	var current_points
+	
+	if upgrade_type == "ship":
+		upgrade_data = UpgradeManager.ship_upgrades[upgrade_id]
+		cost = UpgradeManager.get_ship_upgrade_cost(upgrade_id)
+		current_points = UpgradeManager.clicker_points
+	else:
+		upgrade_data = UpgradeManager.clicker_upgrades[upgrade_id]
+		cost = UpgradeManager.get_clicker_upgrade_cost(upgrade_id)
+		current_points = UpgradeManager.game_points
+	
+	var name_text = upgrade_id.replace("_", " ").capitalize()
+	var level = upgrade_data["level"]
+	var value = upgrade_data["value"]
+	
+	button.text = "%s Lv.%d (+%s) - %d pts" % [name_text, level, str(value), cost]
+	button.disabled = current_points < cost
 
 func _process(delta):
-	if points_per_second > 0:
-		total_points += int(points_per_second * delta)
-		update_ui()
+	# Auto-clicker
+	var auto_speed = UpgradeManager.get_clicker_stat("auto_clicker_speed")
+	if auto_speed > 0:
+		auto_click_timer += delta
+		var interval = 1.0 / auto_speed
+		if auto_click_timer >= interval:
+			auto_click_timer = 0.0
+			perform_click(false)  # Sin animación para auto-click
 
 func _on_click_area_pressed():
-	var click_value = points_per_click
+	perform_click(true)
+
+func perform_click(with_animation: bool = true):
+	var click_value = base_points_per_click + int(UpgradeManager.get_clicker_stat("points_per_click"))
 	
-	# Aplicar bonus de upgrade
-	if upgrades_data["click_power"]["level"] > 0:
-		click_value += upgrades_data["click_power"]["level"] * upgrades_data["click_power"]["bonus"]
+	UpgradeManager.add_clicker_points(click_value)
 	
-	total_points += click_value
-	update_ui()
-	
-	# Animación del sprite
-	animate_click()
-	
-	# Efecto visual de puntos
-	spawn_click_effect(click_value)
+	if with_animation:
+		animate_click()
+		spawn_click_effect(click_value)
 
 func animate_click():
 	if not click_area:
 		return
 	
-	# Animación de escala
 	var tween = create_tween()
 	tween.set_ease(Tween.EASE_OUT)
 	tween.set_trans(Tween.TRANS_ELASTIC)
-	
-	# Crecer
 	tween.tween_property(click_area, "scale", Vector2.ONE * click_scale_amount, click_scale_duration)
-	# Volver a normal
 	tween.tween_property(click_area, "scale", Vector2.ONE, click_scale_duration)
 
 func spawn_click_effect(value: int):
 	if not click_area:
 		return
-		
+	
 	var label = Label.new()
 	label.text = "+" + str(value)
-	label.add_theme_font_size_override("font_size", 48)
+	label.add_theme_font_size_override("font_size", 32)
 	label.add_theme_color_override("font_color", Color(1, 1, 0))
 	
-	# Posición aleatoria alrededor del sprite
-	var pos = click_area.global_position + click_area.size / 2 + Vector2(
-		randf_range(-100, 100),
-		randf_range(-100, 100)
-	)
+	var pos = click_area.global_position + click_area.size / 2
+	pos += Vector2(randf_range(-50, 50), randf_range(-50, 50))
 	label.global_position = pos
+	
 	get_tree().root.add_child(label)
 	
-	# Animación de subida y fade
 	var tween = create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(label, "position:y", pos.y - 150, 1.0)
-	tween.tween_property(label, "modulate:a", 0.0, 1.0)
+	tween.tween_property(label, "position:y", pos.y - 100, 0.8)
+	tween.tween_property(label, "modulate:a", 0.0, 0.8)
 	tween.chain().tween_callback(label.queue_free)
 
 func update_ui():
 	if points_label:
-		points_label.text = "Puntos: " + str(total_points)
+		points_label.text = "Puntos Clicker: " + str(UpgradeManager.clicker_points)
 	
-	# Actualizar botones de upgrade
-	update_upgrade_buttons()
+	if game_points_label:
+		game_points_label.text = "Puntos de Juego: " + str(UpgradeManager.game_points)
 	
-	# Actualizar visibilidad del botón de jugar
-	if start_game_button:
-		if total_points >= 100:
-			start_game_button.visible = true
-			start_game_button.text = "JUGAR (Gratis)"
-		else:
-			start_game_button.visible = false
+	# Actualizar todos los botones
+	for button in ship_upgrades_container.get_children():
+		if button is Button:
+			update_button_text(button)
+	
+	for button in clicker_upgrades_container.get_children():
+		if button is Button:
+			update_button_text(button)
 
-func setup_upgrades():
-	if not upgrades_container:
-		return
-		
-	# Limpiar upgrades anteriores
-	for child in upgrades_container.get_children():
-		child.queue_free()
-	
-	# Crear botones de upgrade
-	for upgrade_id in upgrades_data.keys():
-		var upgrade = upgrades_data[upgrade_id]
-		var button = Button.new()
-		button.name = upgrade_id + "_button"
-		
-		update_upgrade_button_text(button, upgrade_id)
-		button.pressed.connect(_on_upgrade_pressed.bind(upgrade_id))
-		
-		upgrades_container.add_child(button)
-
-func update_upgrade_buttons():
-	if not upgrades_container:
-		return
-	
-	for child in upgrades_container.get_children():
-		if child is Button:
-			var upgrade_id = child.name.replace("_button", "")
-			if upgrade_id in upgrades_data:
-				update_upgrade_button_text(child, upgrade_id)
-
-func update_upgrade_button_text(button: Button, upgrade_id: String):
-	var upgrade = upgrades_data[upgrade_id]
-	var cost = upgrade["cost"] * (upgrade["level"] + 1)
-	
-	var name_text = ""
-	match upgrade_id:
-		"auto_clicker":
-			name_text = "Auto-Clicker"
-		"click_power":
-			name_text = "Poder de Click"
-		"super_auto":
-			name_text = "Super Auto"
-	
-	button.text = "%s Lv.%d - Costo: %d" % [name_text, upgrade["level"], cost]
-	button.disabled = total_points < cost
-
-func _on_upgrade_pressed(upgrade_id: String):
-	var upgrade = upgrades_data[upgrade_id]
-	var cost = upgrade["cost"] * (upgrade["level"] + 1)
-	
-	if total_points >= cost:
-		total_points -= cost
-		upgrade["level"] += 1
-		
-		# Aplicar efecto del upgrade
-		match upgrade_id:
-			"auto_clicker":
-				points_per_second += upgrade["points_per_sec"]
-			"super_auto":
-				points_per_second += upgrade["points_per_sec"]
-		
+func _on_ship_upgrade_pressed(upgrade_id: String):
+	if UpgradeManager.buy_ship_upgrade(upgrade_id):
 		update_ui()
 
-func _on_start_game_button_pressed():
-	start_game_requested.emit()
-	get_tree().change_scene_to_file("res://scenes/game.tscn")
+func _on_clicker_upgrade_pressed(upgrade_id: String):
+	if UpgradeManager.buy_clicker_upgrade(upgrade_id):
+		update_ui()
+
+func _on_points_changed(_new_points: int):
+	update_ui()
+
+func _on_game_points_changed(_new_points: int):
+	update_ui()
+
+func _on_upgrade_purchased(_upgrade_type: String, _upgrade_id: String):
+	update_ui()

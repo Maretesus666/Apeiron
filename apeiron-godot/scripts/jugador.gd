@@ -1,18 +1,26 @@
 extends CharacterBody2D
 
-@export var acceleration: float = 400.0
-@export var max_speed: float = 2100.0  # Ajustado a un valor más razonable
+@export var base_acceleration: float = 400.0
+@export var base_max_speed: float = 2100.0
 @export var friction: float = 0.0
 @export var rotation_speed: float = 5.0
-@export var max_health: int = 5
+@export var base_max_health: int = 5
+@export var base_fire_rate: float = 0.2  # Segundos entre disparos
 @export var shoot_shake_amount: float = 2.0
 @export var shoot_shake_duration: float = 0.1
 @export var damage_shake_amount: float = 10.0
 @export var damage_shake_duration: float = 0.3
 
-var bullet = preload("res://scenes/bala.tscn")
+# Stats mejorados
+var acceleration: float
+var max_speed: float
+var max_health: int
+var fire_rate: float
 var current_health: int
+
+var bullet = preload("res://scenes/bala.tscn")
 var is_shaking = false
+var fire_cooldown: float = 0.0
 
 @onready var puntoDisparo = $PuntoDisparo
 @onready var sprite = $Sprite2D
@@ -22,16 +30,27 @@ signal health_changed(new_health, max_health)
 signal player_died
 
 func _ready():
+	apply_upgrades()
 	current_health = max_health
 	setup_thruster_particles()
 	health_changed.emit(current_health, max_health)
 
+func apply_upgrades():
+	# Aplicar mejoras del UpgradeManager
+	acceleration = base_acceleration + UpgradeManager.get_ship_stat("acceleration")
+	max_speed = base_max_speed + UpgradeManager.get_ship_stat("max_speed")
+	max_health = base_max_health + int(UpgradeManager.get_ship_stat("max_health"))
+	var fire_rate_bonus = UpgradeManager.get_ship_stat("fire_rate")
+	fire_rate = max(0.05, base_fire_rate - fire_rate_bonus)
+
 func _physics_process(delta):
+	fire_cooldown = max(0, fire_cooldown - delta)
+	
 	_handle_movement_with_acceleration(delta)
 	_handle_rotation(delta)
 	_update_thruster_particles()
 
-	if Input.is_action_just_pressed("shoot"):
+	if Input.is_action_pressed("shoot") and fire_cooldown <= 0:
 		_shoot()
 
 func _handle_movement_with_acceleration(delta):
@@ -65,14 +84,14 @@ func _handle_rotation(delta):
 	rotation = lerp_angle(rotation, target_rotation, rotation_speed * delta)
 
 func _shoot():
+	fire_cooldown = fire_rate
+	
 	var newBullet = bullet.instantiate()
 	newBullet.global_position = puntoDisparo.global_position
 	
-	# Inicializar la bala con la velocidad del jugador
 	if newBullet.has_method("initialize"):
 		newBullet.initialize(velocity, rotation)
 	else:
-		# Fallback si no tiene el método
 		newBullet.rotation = rotation
 	
 	get_parent().add_child(newBullet)

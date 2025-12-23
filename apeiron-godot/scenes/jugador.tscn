@@ -30,10 +30,11 @@ shape = SubResource("CircleShape2D_y38cv")
 [node name="PuntoDisparo" type="Node2D" parent="."]
 position = Vector2(47, 0)
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("jugador")]
 limit_smoothed = true
 position_smoothing_speed = 1.0
 rotation_smoothing_speed = 1.0
 script = ExtResource("4_k64kw")
+jugador = NodePath("..")
 
 [node name="ThrusterParticles" type="CPUParticles2D" parent="."]

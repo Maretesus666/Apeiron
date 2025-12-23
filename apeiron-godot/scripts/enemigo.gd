@@ -1,8 +1,7 @@
 extends Area2D
 
-# Configuración del enemigo con aceleración
 @export var acceleration: float = 300.0
-@export var max_speed: float = 2000.0
+@export var max_speed: float = 800.0
 @export var friction: float = 100.0
 @export var rotation_speed: float = 3.0
 @export var health = 3
@@ -12,31 +11,25 @@ var player = null
 var velocity = Vector2.ZERO
 
 func _ready():
+	add_to_group("enemies")  # Agregar al grupo para minimapa e indicadores
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
 	player = get_tree().get_first_node_in_group("player")
 
 func _process(delta):
-	if player:
-		# Calcular dirección hacia el jugador
+	if player and is_instance_valid(player):
 		var direction = (player.global_position - global_position).normalized()
-		
-		# Aplicar aceleración hacia el jugador
 		velocity += direction * acceleration * delta
 		
-		# Limitar velocidad máxima
 		if velocity.length() > max_speed:
 			velocity = velocity.normalized() * max_speed
 		
-		# Mover al enemigo
 		global_position += velocity * delta
 		
-		# Rotar suavemente hacia la dirección de movimiento
 		if velocity.length() > 10:
 			var target_rotation = velocity.angle()
 			rotation = lerp_angle(rotation, target_rotation, rotation_speed * delta)
 	else:
-		# Aplicar fricción si no hay jugador
 		if velocity.length() > friction * delta:
 			velocity -= velocity.normalized() * friction * delta
 		else:
@@ -53,7 +46,6 @@ func take_damage(amount: int):
 func die():
 	spawn_death_particles()
 	
-	# Dar puntos al jugador
 	if ScoreManager:
 		ScoreManager.add_score(10)
 	
@@ -62,7 +54,8 @@ func die():
 func flash_effect():
 	modulate = Color(1, 0, 0)
 	await get_tree().create_timer(0.1).timeout
-	modulate = Color(1, 1, 1)
+	if is_instance_valid(self):
+		modulate = Color(1, 1, 1)
 
 func spawn_hit_particles():
 	var particles = CPUParticles2D.new()
@@ -81,7 +74,8 @@ func spawn_hit_particles():
 	get_tree().root.add_child(particles)
 	
 	await get_tree().create_timer(particles.lifetime).timeout
-	particles.queue_free()
+	if is_instance_valid(particles):
+		particles.queue_free()
 
 func spawn_death_particles():
 	var particles = CPUParticles2D.new()
@@ -100,7 +94,8 @@ func spawn_death_particles():
 	get_tree().root.add_child(particles)
 	
 	await get_tree().create_timer(particles.lifetime).timeout
-	particles.queue_free()
+	if is_instance_valid(particles):
+		particles.queue_free()
 
 func _on_body_entered(body):
 	if body.is_in_group("player"):
