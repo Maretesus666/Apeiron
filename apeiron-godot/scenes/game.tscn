@@ -77,16 +77,18 @@ layout_mode = 2
 [node name="HeartsContainer" type="HBoxContainer" parent="HUD/HealthContainer"]
 layout_mode = 2
 
-[node name="ScoreContainer" type="VBoxContainer" parent="HUD"]
-offset_top = 32.0
+[node name="ScoreContainer" type="HBoxContainer" parent="HUD"]
+offset_top = 8.0
 offset_right = 40.0
-offset_bottom = 82.0
+offset_bottom = 48.0
 
 [node name="ScoreLabel" type="Label" parent="HUD/ScoreContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("7_u5sy4")
 
 [node name="ComboLabel" type="Label" parent="HUD/ScoreContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("7_u5sy4")
 
 [node name="PauseMenu" type="CanvasLayer" parent="."]
 process_mode = 3

@@ -2,7 +2,7 @@ extends CharacterBody2D
 
 @export var acceleration: float = 400.0
 @export var max_speed: float = 4000.0
-@export var friction: float = 600.0
+@export var friction: float = 0.0
 @export var rotation_speed: float = 5.0
 @export var max_health: int = 5
 @export var shoot_shake_amount: float = 2.0
