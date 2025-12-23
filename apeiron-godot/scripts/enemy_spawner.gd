@@ -2,9 +2,9 @@ extends Node2D
 
 @export var enemy_scene = preload("res://scenes/enemigo.tscn")
 @export var spawn_interval = 2.0
-@export var min_distance = 500.0
-@export var max_distance = 1000.0
-@export var max_enemies = 15
+@export var min_distance = 1000.0
+@export var max_distance = 15000.0
+@export var max_enemies = 3
 
 enum SpawnPattern {
 	RANDOM,      # Posiciones aleatorias
