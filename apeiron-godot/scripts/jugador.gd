@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 @export var acceleration: float = 400.0
-@export var max_speed: float = 4000.0
+@export var max_speed: float = 2100.0  # Ajustado a un valor más razonable
 @export var friction: float = 0.0
 @export var rotation_speed: float = 5.0
 @export var max_health: int = 5
@@ -48,14 +48,11 @@ func _handle_movement_with_acceleration(delta):
 
 	if input_dir.length() > 0:
 		input_dir = input_dir.normalized()
-		# Aplicar aceleración en la dirección del input
 		velocity += input_dir * acceleration * delta
 		
-		# Limitar velocidad máxima
 		if velocity.length() > max_speed:
 			velocity = velocity.normalized() * max_speed
 	else:
-		# Aplicar fricción cuando no hay input
 		if velocity.length() > friction * delta:
 			velocity -= velocity.normalized() * friction * delta
 		else:
@@ -69,10 +66,16 @@ func _handle_rotation(delta):
 
 func _shoot():
 	var newBullet = bullet.instantiate()
-	newBullet.rotation = rotation
 	newBullet.global_position = puntoDisparo.global_position
-	get_parent().add_child(newBullet)
 	
+	# Inicializar la bala con la velocidad del jugador
+	if newBullet.has_method("initialize"):
+		newBullet.initialize(velocity, rotation)
+	else:
+		# Fallback si no tiene el método
+		newBullet.rotation = rotation
+	
+	get_parent().add_child(newBullet)
 	apply_shake(shoot_shake_amount, shoot_shake_duration)
 
 func take_damage(amount: int):
@@ -178,7 +181,6 @@ func _update_thruster_particles():
 		var particle_direction = -velocity.normalized()
 		thruster_particles.direction = particle_direction
 		
-		# Intensidad basada en velocidad
 		var intensity = velocity.length() / max_speed
 		thruster_particles.initial_velocity_min = 100 * intensity
 		thruster_particles.initial_velocity_max = 150 * intensity

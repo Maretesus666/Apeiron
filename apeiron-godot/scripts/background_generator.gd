@@ -4,7 +4,7 @@ extends Node2D
 @export var star_speed_min: float = 10.0
 @export var star_speed_max: float = 50.0
 @export var star_size_min: float = 1.0
-@export var star_size_max: float = 5.0
+@export var star_size_max: float = 3.0
 @export var spawn_distance: float = 1000.0
 
 var stars: Array = []

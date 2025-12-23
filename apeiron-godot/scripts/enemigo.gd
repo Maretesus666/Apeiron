@@ -1,11 +1,15 @@
 extends Area2D
 
-# Configuración del enemigo
-@export var speed = 150.0
+# Configuración del enemigo con aceleración
+@export var acceleration: float = 300.0
+@export var max_speed: float = 2000.0
+@export var friction: float = 100.0
+@export var rotation_speed: float = 3.0
 @export var health = 3
 @export var damage = 1
 
 var player = null
+var velocity = Vector2.ZERO
 
 func _ready():
 	body_entered.connect(_on_body_entered)
@@ -14,9 +18,29 @@ func _ready():
 
 func _process(delta):
 	if player:
+		# Calcular dirección hacia el jugador
 		var direction = (player.global_position - global_position).normalized()
-		global_position += direction * speed * delta
-		rotation = direction.angle()
+		
+		# Aplicar aceleración hacia el jugador
+		velocity += direction * acceleration * delta
+		
+		# Limitar velocidad máxima
+		if velocity.length() > max_speed:
+			velocity = velocity.normalized() * max_speed
+		
+		# Mover al enemigo
+		global_position += velocity * delta
+		
+		# Rotar suavemente hacia la dirección de movimiento
+		if velocity.length() > 10:
+			var target_rotation = velocity.angle()
+			rotation = lerp_angle(rotation, target_rotation, rotation_speed * delta)
+	else:
+		# Aplicar fricción si no hay jugador
+		if velocity.length() > friction * delta:
+			velocity -= velocity.normalized() * friction * delta
+		else:
+			velocity = Vector2.ZERO
 
 func take_damage(amount: int):
 	health -= amount
@@ -29,7 +53,7 @@ func take_damage(amount: int):
 func die():
 	spawn_death_particles()
 	
-	# Dar puntos al jugador - VERIFICAR que ScoreManager exista
+	# Dar puntos al jugador
 	if ScoreManager:
 		ScoreManager.add_score(10)
 	

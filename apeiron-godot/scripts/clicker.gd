@@ -2,6 +2,8 @@ extends Control
 
 @export var points_per_click: int = 1
 @export var points_per_second: int = 0
+@export var click_scale_amount: float = 1.2  # Cuánto crece al clickear
+@export var click_scale_duration: float = 0.1  # Duración de la animación
 
 var total_points: int = 0
 var upgrades_data = {
@@ -10,30 +12,54 @@ var upgrades_data = {
 	"super_auto": {"cost": 50, "level": 0, "points_per_sec": 5}
 }
 
-# Usar get_node para evitar errores si no existen los nodos
 @onready var points_label = get_node_or_null("VBoxContainer/PointsLabel")
-@onready var click_button = get_node_or_null("VBoxContainer/ClickButton")
+@onready var click_area = get_node_or_null("VBoxContainer/ClickArea")
+@onready var click_sprite = get_node_or_null("VBoxContainer/ClickArea/ClickSprite")
 @onready var start_game_button = get_node_or_null("VBoxContainer/StartGameButton")
 @onready var upgrades_container = get_node_or_null("VBoxContainer/UpgradesContainer")
 
 signal start_game_requested
 
 func _ready():
+	setup_click_area()
 	update_ui()
 	setup_upgrades()
 	
-	# Conectar señales manualmente si existen
-	if click_button:
-		click_button.pressed.connect(_on_click_button_pressed)
 	if start_game_button:
 		start_game_button.pressed.connect(_on_start_game_button_pressed)
+
+func setup_click_area():
+	# Si no existe el ClickArea, crearlo
+	if not click_area:
+		click_area = TextureButton.new()
+		click_area.name = "ClickArea"
+		click_area.custom_minimum_size = Vector2(250, 250)
+		click_area.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+		click_area.ignore_texture_size = true
+		
+		# Crear sprite si no existe
+		if not click_sprite:
+			# Usar la imagen de la nave como sprite clickeable
+			var texture = load("res://assets/sprites/nave.png")
+			click_area.texture_normal = texture
+		
+		# Añadir al VBoxContainer si existe
+		var vbox = get_node_or_null("VBoxContainer")
+		if vbox:
+			# Insertar después de PointsLabel
+			vbox.add_child(click_area)
+			vbox.move_child(click_area, 1)
+	
+	# Conectar señal de click
+	if click_area and not click_area.pressed.is_connected(_on_click_area_pressed):
+		click_area.pressed.connect(_on_click_area_pressed)
 
 func _process(delta):
 	if points_per_second > 0:
 		total_points += int(points_per_second * delta)
 		update_ui()
 
-func _on_click_button_pressed():
+func _on_click_area_pressed():
 	var click_value = points_per_click
 	
 	# Aplicar bonus de upgrade
@@ -43,34 +69,56 @@ func _on_click_button_pressed():
 	total_points += click_value
 	update_ui()
 	
-	# Efecto visual
-	spawn_click_effect()
+	# Animación del sprite
+	animate_click()
+	
+	# Efecto visual de puntos
+	spawn_click_effect(click_value)
 
-func spawn_click_effect():
-	if not click_button:
+func animate_click():
+	if not click_area:
+		return
+	
+	# Animación de escala
+	var tween = create_tween()
+	tween.set_ease(Tween.EASE_OUT)
+	tween.set_trans(Tween.TRANS_ELASTIC)
+	
+	# Crecer
+	tween.tween_property(click_area, "scale", Vector2.ONE * click_scale_amount, click_scale_duration)
+	# Volver a normal
+	tween.tween_property(click_area, "scale", Vector2.ONE, click_scale_duration)
+
+func spawn_click_effect(value: int):
+	if not click_area:
 		return
 		
 	var label = Label.new()
-	label.text = "+" + str(points_per_click)
-	label.add_theme_font_size_override("font_size", 32)
+	label.text = "+" + str(value)
+	label.add_theme_font_size_override("font_size", 48)
 	label.add_theme_color_override("font_color", Color(1, 1, 0))
 	
-	var pos = click_button.global_position + Vector2(
-		randf_range(-50, 50),
-		randf_range(-50, 50)
+	# Posición aleatoria alrededor del sprite
+	var pos = click_area.global_position + click_area.size / 2 + Vector2(
+		randf_range(-100, 100),
+		randf_range(-100, 100)
 	)
 	label.global_position = pos
-	get_parent().add_child(label)
+	get_tree().root.add_child(label)
 	
 	# Animación de subida y fade
 	var tween = create_tween()
-	tween.tween_property(label, "position:y", pos.y - 100, 1.0)
-	tween.parallel().tween_property(label, "modulate:a", 0.0, 1.0)
-	tween.tween_callback(label.queue_free)
+	tween.set_parallel(true)
+	tween.tween_property(label, "position:y", pos.y - 150, 1.0)
+	tween.tween_property(label, "modulate:a", 0.0, 1.0)
+	tween.chain().tween_callback(label.queue_free)
 
 func update_ui():
 	if points_label:
 		points_label.text = "Puntos: " + str(total_points)
+	
+	# Actualizar botones de upgrade
+	update_upgrade_buttons()
 	
 	# Actualizar visibilidad del botón de jugar
 	if start_game_button:
@@ -92,11 +140,22 @@ func setup_upgrades():
 	for upgrade_id in upgrades_data.keys():
 		var upgrade = upgrades_data[upgrade_id]
 		var button = Button.new()
+		button.name = upgrade_id + "_button"
 		
 		update_upgrade_button_text(button, upgrade_id)
 		button.pressed.connect(_on_upgrade_pressed.bind(upgrade_id))
 		
 		upgrades_container.add_child(button)
+
+func update_upgrade_buttons():
+	if not upgrades_container:
+		return
+	
+	for child in upgrades_container.get_children():
+		if child is Button:
+			var upgrade_id = child.name.replace("_button", "")
+			if upgrade_id in upgrades_data:
+				update_upgrade_button_text(child, upgrade_id)
 
 func update_upgrade_button_text(button: Button, upgrade_id: String):
 	var upgrade = upgrades_data[upgrade_id]
@@ -130,7 +189,6 @@ func _on_upgrade_pressed(upgrade_id: String):
 				points_per_second += upgrade["points_per_sec"]
 		
 		update_ui()
-		setup_upgrades()
 
 func _on_start_game_button_pressed():
 	start_game_requested.emit()
