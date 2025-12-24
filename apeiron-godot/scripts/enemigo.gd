@@ -1,6 +1,6 @@
 extends Area2D
 
-@export var acceleration: float = 2000.0
+@export var acceleration: float = 400.0
 @export var max_speed: float = 2000.0
 @export var friction: float = 100.0
 @export var rotation_speed: float = 50.0

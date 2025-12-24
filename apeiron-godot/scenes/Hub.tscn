@@ -1,8 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://c01db0i7tgm2d"]
+[gd_scene load_steps=7 format=3 uid="uid://c01db0i7tgm2d"]
 
 [ext_resource type="Script" uid="uid://dntkixgnexo5x" path="res://scripts/hub.gd" id="1_wi61l"]
+[ext_resource type="Script" uid="uid://nn6rx2sec51g" path="res://scripts/background_generator.gd" id="2_1t77w"]
 [ext_resource type="Script" uid="uid://bh84wxh68ihog" path="res://scripts/clicker.gd" id="2_4qglb"]
 [ext_resource type="FontFile" uid="uid://bjkvctpyibltk" path="res://assets/fonts/ultrakill.ttf" id="2_7f5op"]
+[ext_resource type="Shader" uid="uid://cvu8ucill03dy" path="res://shaders/menu.gdshader" id="3_tm630"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hnc56"]
+shader = ExtResource("3_tm630")
 
 [node name="Hub" type="Control"]
 layout_mode = 3
@@ -12,6 +17,28 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_wi61l")
+
+[node name="BackgroundGenerator" type="Node2D" parent="."]
+script = ExtResource("2_1t77w")
+
+[node name="FondoGenerado" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="Fondo" type="ColorRect" parent="FondoGenerado"]
+z_index = -1
+material = SubResource("ShaderMaterial_hnc56")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -984.0
+offset_top = -542.0
+offset_right = 1017.0
+offset_bottom = 390.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 0
+color = Color(0, 0, 0, 1)
+metadata/_edit_use_anchors_ = true
 
 [node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 0
@@ -32,6 +59,7 @@ metadata/_tab_index = 0
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+scale = Vector2(0.1, 0.1)
 
 [node name="PointsLabel" type="Label" parent="TabContainer/Clicker/VBoxContainer"]
 layout_mode = 2
