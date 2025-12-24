@@ -4,7 +4,7 @@ extends Node2D
 @export var spawn_interval = 2.0
 @export var min_distance = 1000.0
 @export var max_distance = 15000.0
-@export var max_enemies = 3
+@export var max_enemies = 15
 
 enum SpawnPattern {
 	RANDOM,      # Posiciones aleatorias

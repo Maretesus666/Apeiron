@@ -84,7 +84,7 @@ func create_indicator(enemy: Node2D):
 	var arrow := Sprite2D.new()
 	arrow.texture = preload("res://assets/sprites/advertencia.png")
 	arrow.centered = true
-	arrow.scale = Vector2(0.08, 0.08)
+	arrow.scale = Vector2(0.03, 0.03)
 	indicator.add_child(arrow)
 
 	var label := Label.new()

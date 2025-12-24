@@ -1,7 +1,7 @@
 extends Control
 
 @export var minimap_size: Vector2 = Vector2(200, 200)
-@export var world_scale: float = 0.005  # Escala del mundo en el minimapa
+@export var world_scale: float = 0.05  # Escala del mundo en el minimapa
 @export var player_color: Color = Color(0, 1, 0)
 @export var enemy_color: Color = Color(1, 0, 0)
 @export var player_size: float = 6.0
