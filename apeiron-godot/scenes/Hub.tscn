@@ -95,7 +95,7 @@ resource_name = "button_step_001"
 tracks/0/type = "bezier"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2:custom_minimum_size:x")
+tracks/0/path = NodePath("ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2:custom_minimum_size:x")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -106,7 +106,7 @@ tracks/0/keys = {
 tracks/1/type = "bezier"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2:custom_minimum_size:y")
+tracks/1/path = NodePath("ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2:custom_minimum_size:y")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -117,7 +117,7 @@ tracks/1/keys = {
 tracks/2/type = "bezier"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("VBoxContainer/PanelContainer/HBoxContainer/PanelContainer:custom_minimum_size:x")
+tracks/2/path = NodePath("ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer:custom_minimum_size:x")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -128,7 +128,7 @@ tracks/2/keys = {
 tracks/3/type = "bezier"
 tracks/3/imported = false
 tracks/3/enabled = true
-tracks/3/path = NodePath("VBoxContainer/PanelContainer/HBoxContainer/PanelContainer:custom_minimum_size:y")
+tracks/3/path = NodePath("ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer:custom_minimum_size:y")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
@@ -139,7 +139,7 @@ tracks/3/keys = {
 tracks/4/type = "bezier"
 tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath("VBoxContainer/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer/Label:theme_override_font_sizes/font_size")
+tracks/4/path = NodePath("ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer/Label:theme_override_font_sizes/font_size")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
@@ -150,7 +150,7 @@ tracks/4/keys = {
 tracks/5/type = "bezier"
 tracks/5/imported = false
 tracks/5/enabled = true
-tracks/5/path = NodePath("VBoxContainer/PanelContainer/Control/PanelContainer:position:x")
+tracks/5/path = NodePath("ContenedorBotones/PanelContainer/Control/PanelContainer:position:x")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
@@ -161,7 +161,7 @@ tracks/5/keys = {
 tracks/6/type = "bezier"
 tracks/6/imported = false
 tracks/6/enabled = true
-tracks/6/path = NodePath("VBoxContainer/PanelContainer/Control/PanelContainer:position:y")
+tracks/6/path = NodePath("ContenedorBotones/PanelContainer/Control/PanelContainer:position:y")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
@@ -172,7 +172,7 @@ tracks/6/keys = {
 tracks/7/type = "bezier"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("VBoxContainer/PanelContainer/Control/PanelContainer:size:x")
+tracks/7/path = NodePath("ContenedorBotones/PanelContainer/Control/PanelContainer:size:x")
 tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
@@ -183,7 +183,7 @@ tracks/7/keys = {
 tracks/8/type = "bezier"
 tracks/8/imported = false
 tracks/8/enabled = true
-tracks/8/path = NodePath("VBoxContainer/PanelContainer/Control/PanelContainer:size:y")
+tracks/8/path = NodePath("ContenedorBotones/PanelContainer/Control/PanelContainer:size:y")
 tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/keys = {
@@ -194,7 +194,7 @@ tracks/8/keys = {
 tracks/9/type = "bezier"
 tracks/9/imported = false
 tracks/9/enabled = true
-tracks/9/path = NodePath("VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer/Label:theme_override_font_sizes/font_size")
+tracks/9/path = NodePath("ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer/Label:theme_override_font_sizes/font_size")
 tracks/9/interp = 1
 tracks/9/loop_wrap = true
 tracks/9/keys = {
@@ -208,7 +208,7 @@ resource_name = "button_step_002"
 tracks/0/type = "bezier"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("VBoxContainer/PanelContainer/HBoxContainer/PanelContainer:custom_minimum_size:x")
+tracks/0/path = NodePath("ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer:custom_minimum_size:x")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -219,7 +219,7 @@ tracks/0/keys = {
 tracks/1/type = "bezier"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("VBoxContainer/PanelContainer/HBoxContainer/PanelContainer:custom_minimum_size:y")
+tracks/1/path = NodePath("ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer:custom_minimum_size:y")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -230,7 +230,7 @@ tracks/1/keys = {
 tracks/2/type = "bezier"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2:custom_minimum_size:x")
+tracks/2/path = NodePath("ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2:custom_minimum_size:x")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -241,7 +241,7 @@ tracks/2/keys = {
 tracks/3/type = "bezier"
 tracks/3/imported = false
 tracks/3/enabled = true
-tracks/3/path = NodePath("VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2:custom_minimum_size:y")
+tracks/3/path = NodePath("ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2:custom_minimum_size:y")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
@@ -252,7 +252,7 @@ tracks/3/keys = {
 tracks/4/type = "bezier"
 tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath("VBoxContainer/PanelContainer/Control/PanelContainer:position:x")
+tracks/4/path = NodePath("ContenedorBotones/PanelContainer/Control/PanelContainer:position:x")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
@@ -263,7 +263,7 @@ tracks/4/keys = {
 tracks/5/type = "bezier"
 tracks/5/imported = false
 tracks/5/enabled = true
-tracks/5/path = NodePath("VBoxContainer/PanelContainer/Control/PanelContainer:position:y")
+tracks/5/path = NodePath("ContenedorBotones/PanelContainer/Control/PanelContainer:position:y")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
@@ -274,7 +274,7 @@ tracks/5/keys = {
 tracks/6/type = "bezier"
 tracks/6/imported = false
 tracks/6/enabled = true
-tracks/6/path = NodePath("VBoxContainer/PanelContainer/Control/PanelContainer:size:x")
+tracks/6/path = NodePath("ContenedorBotones/PanelContainer/Control/PanelContainer:size:x")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
@@ -285,7 +285,7 @@ tracks/6/keys = {
 tracks/7/type = "bezier"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("VBoxContainer/PanelContainer/Control/PanelContainer:size:y")
+tracks/7/path = NodePath("ContenedorBotones/PanelContainer/Control/PanelContainer:size:y")
 tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
@@ -296,7 +296,7 @@ tracks/7/keys = {
 tracks/8/type = "bezier"
 tracks/8/imported = false
 tracks/8/enabled = true
-tracks/8/path = NodePath("VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer/Label:theme_override_font_sizes/font_size")
+tracks/8/path = NodePath("ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer/Label:theme_override_font_sizes/font_size")
 tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/keys = {
@@ -307,7 +307,7 @@ tracks/8/keys = {
 tracks/9/type = "bezier"
 tracks/9/imported = false
 tracks/9/enabled = true
-tracks/9/path = NodePath("VBoxContainer/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer/Label:theme_override_font_sizes/font_size")
+tracks/9/path = NodePath("ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer/Label:theme_override_font_sizes/font_size")
 tracks/9/interp = 1
 tracks/9/loop_wrap = true
 tracks/9/keys = {
@@ -354,7 +354,7 @@ size_flags_vertical = 0
 color = Color(0, 0, 0, 1)
 metadata/_edit_use_anchors_ = true
 
-[node name="TabContainer" type="TabContainer" parent="."]
+[node name="jugabilidad" type="TabContainer" parent="."]
 visible = false
 layout_mode = 0
 offset_left = 59.0
@@ -365,68 +365,68 @@ theme_override_fonts/font = ExtResource("2_7f5op")
 theme_override_font_sizes/font_size = 128
 current_tab = 0
 
-[node name="Clicker" type="Control" parent="TabContainer"]
+[node name="Clicker" type="Control" parent="jugabilidad"]
 layout_mode = 2
 script = ExtResource("2_4qglb")
 metadata/_tab_index = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Clicker"]
+[node name="VBoxContainer" type="VBoxContainer" parent="jugabilidad/Clicker"]
 layout_mode = 0
 offset_right = 829.99994
 offset_bottom = 630.0
 scale = Vector2(0.1, 0.1)
 
-[node name="PointsLabel" type="Label" parent="TabContainer/Clicker/VBoxContainer"]
+[node name="PointsLabel" type="Label" parent="jugabilidad/Clicker/VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_7f5op")
 theme_override_font_sizes/font_size = 64
 text = "Puntos:"
 
-[node name="ClickButton" type="Button" parent="TabContainer/Clicker/VBoxContainer"]
+[node name="ClickButton" type="Button" parent="jugabilidad/Clicker/VBoxContainer"]
 texture_repeat = 1
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_7f5op")
 theme_override_font_sizes/font_size = 64
 text = "Click"
 
-[node name="UpgradesContainer" type="VBoxContainer" parent="TabContainer/Clicker/VBoxContainer"]
+[node name="UpgradesContainer" type="VBoxContainer" parent="jugabilidad/Clicker/VBoxContainer"]
 layout_mode = 2
 
-[node name="StartGameButton" type="Button" parent="TabContainer/Clicker/VBoxContainer"]
+[node name="StartGameButton" type="Button" parent="jugabilidad/Clicker/VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_7f5op")
 theme_override_font_sizes/font_size = 64
 text = "Start"
 
-[node name="ClickUpgradesContainer" type="VBoxContainer" parent="TabContainer/Clicker/VBoxContainer"]
+[node name="ClickUpgradesContainer" type="VBoxContainer" parent="jugabilidad/Clicker/VBoxContainer"]
 layout_mode = 2
 
-[node name="ShipUpgradesContainer" type="VBoxContainer" parent="TabContainer/Clicker/VBoxContainer"]
+[node name="ShipUpgradesContainer" type="VBoxContainer" parent="jugabilidad/Clicker/VBoxContainer"]
 layout_mode = 2
 
-[node name="Juego" type="Control" parent="TabContainer"]
+[node name="Juego" type="Control" parent="jugabilidad"]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Juego"]
+[node name="VBoxContainer" type="VBoxContainer" parent="jugabilidad/Juego"]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="InfoLabel" type="Label" parent="TabContainer/Juego/VBoxContainer"]
+[node name="InfoLabel" type="Label" parent="jugabilidad/Juego/VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_7f5op")
 theme_override_font_sizes/font_size = 64
 text = "Jugar a las navee"
 
-[node name="PlayButton" type="Button" parent="TabContainer/Juego/VBoxContainer"]
+[node name="PlayButton" type="Button" parent="jugabilidad/Juego/VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_7f5op")
 theme_override_font_sizes/font_size = 64
 text = "Play"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="ContenedorBotones" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -434,67 +434,66 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="ContenedorBotones"]
 layout_mode = 2
 size_flags_vertical = 3
 theme = SubResource("Theme_tm630")
 vertical_scroll_mode = 0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/ScrollContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="ContenedorBotones/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 0
 
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/ScrollContainer/HBoxContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer"]
 custom_minimum_size = Vector2(1080, 0)
 layout_mode = 2
 size_flags_horizontal = 6
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_1t77w")
 
-[node name="PanelContainer2" type="PanelContainer" parent="VBoxContainer/ScrollContainer/HBoxContainer"]
+[node name="PanelContainer2" type="PanelContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer"]
 custom_minimum_size = Vector2(1080, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_tm630")
 
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="ContenedorBotones"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_hnc56")
 
-[node name="Control" type="Control" parent="VBoxContainer/PanelContainer"]
+[node name="Control" type="Control" parent="ContenedorBotones/PanelContainer"]
 layout_mode = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/PanelContainer/Control"]
+[node name="PanelContainer" type="PanelContainer" parent="ContenedorBotones/PanelContainer/Control"]
 custom_minimum_size = Vector2(538, 144)
 layout_mode = 1
-offset_left = 542.0
-offset_right = 1080.0
+offset_right = 538.0
 offset_bottom = 144.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_6grgh")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/PanelContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="ContenedorBotones/PanelContainer"]
 custom_minimum_size = Vector2(0, 144)
 layout_mode = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/PanelContainer/HBoxContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="ContenedorBotones/PanelContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_48iqm")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer"]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer"]
+[node name="CenterContainer" type="CenterContainer" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Control" type="Control" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer/CenterContainer"]
+[node name="Control" type="Control" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer/CenterContainer"]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer/CenterContainer/Control"]
+[node name="MarginContainer" type="MarginContainer" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer/CenterContainer/Control"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -508,7 +507,7 @@ offset_bottom = 50.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer/CenterContainer/Control/MarginContainer"]
+[node name="TextureRect" type="TextureRect" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer/CenterContainer/Control/MarginContainer"]
 texture_filter = 2
 texture_repeat = 1
 custom_minimum_size = Vector2(100, 100)
@@ -517,38 +516,38 @@ texture = ExtResource("6_tm630")
 expand_mode = 2
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/outline_size = 10
 theme_override_fonts/font = ExtResource("2_7f5op")
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 40
 text = "NAVE"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Button" type="Button" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer"]
+[node name="Button" type="Button" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer"]
 layout_mode = 2
 focus_mode = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_tm630")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_hnc56")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_6grgh")
 
-[node name="PanelContainer2" type="PanelContainer" parent="VBoxContainer/PanelContainer/HBoxContainer"]
+[node name="PanelContainer2" type="PanelContainer" parent="ContenedorBotones/PanelContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_48iqm")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2"]
+[node name="VBoxContainer" type="VBoxContainer" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2"]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer"]
+[node name="CenterContainer" type="CenterContainer" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Control" type="Control" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer/CenterContainer"]
+[node name="Control" type="Control" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer/CenterContainer"]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer/CenterContainer/Control"]
+[node name="MarginContainer" type="MarginContainer" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer/CenterContainer/Control"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -566,7 +565,7 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer/CenterContainer/Control/MarginContainer"]
+[node name="TextureRect" type="TextureRect" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer/CenterContainer/Control/MarginContainer"]
 texture_filter = 2
 texture_repeat = 1
 custom_minimum_size = Vector2(100, 100)
@@ -575,16 +574,16 @@ texture = ExtResource("6_tm630")
 expand_mode = 2
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer"]
+[node name="Label" type="Label" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/outline_size = 10
 theme_override_fonts/font = ExtResource("2_7f5op")
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 32
 text = "NUCLEO"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Button" type="Button" parent="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2"]
+[node name="Button" type="Button" parent="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2"]
 layout_mode = 2
 focus_mode = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_tm630")
@@ -601,10 +600,10 @@ libraries = {
 &"": SubResource("AnimationLibrary_o7rky")
 }
 
-[connection signal="pressed" from="TabContainer/Clicker/VBoxContainer/ClickButton" to="." method="_on_click_button_pressed"]
-[connection signal="pressed" from="TabContainer/Clicker/VBoxContainer/StartGameButton" to="TabContainer/Clicker" method="_on_start_game_button_pressed"]
-[connection signal="pressed" from="TabContainer/Juego/VBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]
-[connection signal="scroll_ended" from="VBoxContainer/ScrollContainer" to="." method="_on_scroll_container_scroll_ended"]
-[connection signal="scroll_started" from="VBoxContainer/ScrollContainer" to="." method="_on_scroll_container_scroll_started"]
-[connection signal="pressed" from="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer/Button" to="." method="_on_button_pressed" binds= [0]]
-[connection signal="pressed" from="VBoxContainer/PanelContainer/HBoxContainer/PanelContainer2/Button" to="." method="_on_button_pressed" binds= [1]]
+[connection signal="pressed" from="jugabilidad/Clicker/VBoxContainer/ClickButton" to="." method="_on_click_button_pressed"]
+[connection signal="pressed" from="jugabilidad/Clicker/VBoxContainer/StartGameButton" to="jugabilidad/Clicker" method="_on_start_game_button_pressed"]
+[connection signal="pressed" from="jugabilidad/Juego/VBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]
+[connection signal="scroll_ended" from="ContenedorBotones/ScrollContainer" to="." method="_on_scroll_container_scroll_ended"]
+[connection signal="scroll_started" from="ContenedorBotones/ScrollContainer" to="." method="_on_scroll_container_scroll_started"]
+[connection signal="pressed" from="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer/Button" to="." method="_on_button_pressed" binds= [0]]
+[connection signal="pressed" from="ContenedorBotones/PanelContainer/HBoxContainer/PanelContainer2/Button" to="." method="_on_button_pressed" binds= [1]]
