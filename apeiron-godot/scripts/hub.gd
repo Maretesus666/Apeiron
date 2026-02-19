@@ -10,19 +10,16 @@ var is_scrolling: bool = false
 var is_manual_scrolling: bool = false
 var scroll_to: float = 0.0
 var scroll_to_index: int = 0
+var page_width: float = 0.0
+var scroll_pos: float = 0.0
 
 func _ready():
 	await get_tree().process_frame
-	@warning_ignore("narrowing_conversion")
+	await get_tree().process_frame  # segundo frame para que el layout termine
+	page_width = scroller.get_child(0).get_child(0).size.x
 	scroller.scroll_horizontal = 0
 
-	# El script del clicker ahora está en la página del scroll, no en un tab
-	# Si usás clicker.gd en la página 1, asegurate de que el nodo tenga el script asignado
-func get_page_width() -> float:
-	var hbox = scroller.get_child(0)
-	if hbox and hbox.get_child_count() > 0:
-		return hbox.get_child(0).size.x
-	return scroller.size.x
+ 
 func _on_play_button_pressed():
 	get_tree().change_scene_to_file("res://scenes/game.tscn")
 
@@ -32,39 +29,42 @@ func _on_scroll_container_scroll_started() -> void:
 
 func _on_scroll_container_scroll_ended() -> void:
 	is_scrolling = false
-
+	
+	
 func _process(delta: float) -> void:
-	var page_width := get_page_width() 
+	var max_scroll := scroller.get_h_scroll_bar().max_value
+	if max_scroll == 0:
+		return
 
 	if is_manual_scrolling:
-		var current_scroll: float = scroller.scroll_horizontal
-		scroller.scroll_horizontal = int(lerp(float(current_scroll), scroll_to, 1.0 - pow(0.001, delta)))
-		var blend := scroller.scroll_horizontal / page_width
-		animation_tree["parameters/blend_position"] = blend
+		scroll_pos = lerp(scroll_pos, scroll_to, 1.0 - pow(0.001, delta))
+		scroller.scroll_horizontal = int(scroll_pos)
+		animation_tree["parameters/blend_position"] = scroll_pos / max_scroll
 
-		if abs(scroller.scroll_horizontal - scroll_to) < 1.0:
-			@warning_ignore("narrowing_conversion")
-			scroller.scroll_horizontal = scroll_to
+		if abs(scroll_pos - scroll_to) < 0.5:
+			scroll_pos = scroll_to
+			scroller.scroll_horizontal = int(scroll_to)
 			animation_tree["parameters/blend_position"] = float(scroll_to_index)
 			is_manual_scrolling = false
 			set_process(false)
 	else:
-		var scroll: float = scroller.scroll_horizontal / page_width
-		var target: float = float(round(scroll))
+		var progress := float(scroller.scroll_horizontal) / max_scroll
+		var target := float(round(progress))
 
 		if is_scrolling:
-			animation_tree["parameters/blend_position"] = scroll
-		elif abs(target - scroll) > 0.01:
+			animation_tree["parameters/blend_position"] = progress
+		elif abs(target - progress) > 0.01:
 			animation_tree["parameters/blend_position"] = lerp(float(animation_tree["parameters/blend_position"]), target, 0.1)
-			scroller.scroll_horizontal = int(lerp(float(scroller.scroll_horizontal), page_width * target, 0.2))
+			scroller.scroll_horizontal = int(lerp(float(scroller.scroll_horizontal), max_scroll * target, 0.2))
 		else:
 			animation_tree["parameters/blend_position"] = target
-			@warning_ignore("narrowing_conversion")
-			scroller.scroll_horizontal = page_width * target
+			scroller.scroll_horizontal = int(max_scroll * target)
 			set_process(false)
+
 func _on_button_pressed(extra_arg_0: int) -> void:
-	await get_tree().process_frame
+	var max_scroll := scroller.get_h_scroll_bar().max_value
+	scroll_pos = float(scroller.scroll_horizontal)  # ← esta línea
 	scroll_to_index = extra_arg_0
-	scroll_to = get_page_width() * extra_arg_0
+	scroll_to = max_scroll * float(extra_arg_0)
 	is_manual_scrolling = true
 	set_process(true)
