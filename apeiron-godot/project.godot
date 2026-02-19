@@ -23,6 +23,7 @@ EnemyIndicators="*res://scripts/enemy_indicators.gd"
 
 [display]
 
+window/size/viewport_width=1080
 window/stretch/mode="canvas_items"
 
 [input]
