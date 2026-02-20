@@ -1,9 +1,10 @@
-[gd_scene load_steps=23 format=3 uid="uid://c01db0i7tgm2d"]
+[gd_scene load_steps=24 format=3 uid="uid://c01db0i7tgm2d"]
 
 [ext_resource type="Script" uid="uid://dntkixgnexo5x" path="res://scripts/hub.gd" id="1_wi61l"]
 [ext_resource type="Script" uid="uid://nn6rx2sec51g" path="res://scripts/background_generator.gd" id="2_1t77w"]
 [ext_resource type="FontFile" uid="uid://bjkvctpyibltk" path="res://assets/fonts/ultrakill.ttf" id="2_7f5op"]
 [ext_resource type="Shader" uid="uid://cvu8ucill03dy" path="res://shaders/menu.gdshader" id="3_tm630"]
+[ext_resource type="Script" uid="uid://mvfa7t62eqnm" path="res://scenes/nucleo.gd" id="4_tm630"]
 [ext_resource type="Texture2D" uid="uid://dsqmf3qkp4ovd" path="res://assets/sprites/nave.png" id="6_tm630"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_hnc56"]
@@ -374,42 +375,39 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 0
 
-[node name="PanelContainer" type="PanelContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer"]
+[node name="nucleo" type="PanelContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer"]
 custom_minimum_size = Vector2(1080, 0)
 layout_mode = 2
 size_flags_horizontal = 6
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_1t77w")
+script = ExtResource("4_tm630")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer/PanelContainer"]
+[node name="Clicker" type="VBoxContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer/nucleo"]
 layout_mode = 2
 
-[node name="PointsLabel" type="Label" parent="ContenedorBotones/ScrollContainer/HBoxContainer/PanelContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_7f5op")
-theme_override_font_sizes/font_size = 64
-text = "Puntos:"
-
-[node name="ClickButton" type="Button" parent="ContenedorBotones/ScrollContainer/HBoxContainer/PanelContainer/VBoxContainer"]
+[node name="ClickButton" type="Button" parent="ContenedorBotones/ScrollContainer/HBoxContainer/nucleo/Clicker"]
+visible = false
 texture_repeat = 1
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_7f5op")
 theme_override_font_sizes/font_size = 64
 text = "Click"
 
-[node name="UpgradesContainer" type="VBoxContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer/PanelContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="StartGameButton" type="Button" parent="ContenedorBotones/ScrollContainer/HBoxContainer/PanelContainer/VBoxContainer"]
+[node name="StartGameButton" type="Button" parent="ContenedorBotones/ScrollContainer/HBoxContainer/nucleo/Clicker"]
+visible = false
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_7f5op")
 theme_override_font_sizes/font_size = 64
 text = "Start"
 
-[node name="ClickUpgradesContainer" type="VBoxContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer/PanelContainer/VBoxContainer"]
+[node name="UpgradesContainer" type="VBoxContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer/nucleo/Clicker"]
 layout_mode = 2
 
-[node name="ShipUpgradesContainer" type="VBoxContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer/PanelContainer/VBoxContainer"]
+[node name="ClickUpgradesContainer" type="VBoxContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer/nucleo/Clicker"]
+layout_mode = 2
+
+[node name="ShipUpgradesContainer" type="VBoxContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer/nucleo/Clicker"]
 layout_mode = 2
 
 [node name="PanelContainer2" type="PanelContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer"]
