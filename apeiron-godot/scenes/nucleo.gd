@@ -78,7 +78,11 @@ func _build_ui() -> void:
 	hint.add_theme_color_override("font_color", Color(1, 1, 1, 0.4))
 	hint.text = "[ tocame el núcleo ]"
 	vbox.add_child(hint)
-
+	var btn_mejoras := Button.new()
+	btn_mejoras.text = "MEJORAS NÚCLEO"
+	btn_mejoras.add_theme_font_override("font", load("res://assets/fonts/ultrakill.ttf"))
+	btn_mejoras.add_theme_font_size_override("font_size", 30) 
+	vbox.add_child(btn_mejoras)
 func _process(delta: float) -> void:
 	# Rotación lenta
 	if nucleo_sprite:
@@ -131,3 +135,4 @@ func _spawn_float_label(value: int) -> void:
 func _on_points_changed(new_points: int) -> void:
 	if points_label:
 		points_label.text = "%d" % new_points
+		

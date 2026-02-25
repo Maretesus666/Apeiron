@@ -2,7 +2,7 @@ extends Control
 
 @onready var scroller: ScrollContainer = $ContenedorBotones/ScrollContainer
 @onready var animation_tree: AnimationTree = $AnimationTree
-
+@onready var panel_mejoras := $PanelMejoras
 # Ya no necesitás tab_container ni clicker_tab
 # El clicker script va directo en la página 1
 
@@ -16,7 +16,9 @@ func _ready():
 	await get_tree().process_frame  # segundo frame para que el layout termine
 	page_width = scroller.get_child(0).get_child(0).size.x
 	scroller.scroll_horizontal = 0
-
+	var nucleo := $ContenedorBotones/ScrollContainer/HBoxContainer/nucleo
+	if nucleo.has_signal("mejoras_solicitadas"):
+		nucleo.mejoras_solicitadas.connect(panel_mejoras.abrir)
  
 func _on_play_button_pressed():
 	get_tree().change_scene_to_file("res://scenes/game.tscn")
@@ -64,3 +66,7 @@ func _on_button_pressed(extra_arg_0: int) -> void:
 	button_tween.set_ease(Tween.EASE_IN_OUT)
 	button_tween.tween_method(func(v: float): scroller.scroll_horizontal = int(v), float(scroller.scroll_horizontal), target_scroll, duration)
 	button_tween.tween_property(animation_tree, "parameters/blend_position", float(extra_arg_0), duration)
+
+
+func _on_mejoras_nave_btn_pressed() -> void:
+	panel_mejoras.abrir("nave") 
