@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://c01db0i7tgm2d"]
+[gd_scene load_steps=26 format=3 uid="uid://c01db0i7tgm2d"]
 
 [ext_resource type="Script" uid="uid://dntkixgnexo5x" path="res://scripts/hub.gd" id="1_wi61l"]
 [ext_resource type="Script" uid="uid://nn6rx2sec51g" path="res://scripts/background_generator.gd" id="2_1t77w"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://mvfa7t62eqnm" path="res://scenes/nucleo.gd" id="4_tm630"]
 [ext_resource type="Texture2D" uid="uid://dsqmf3qkp4ovd" path="res://assets/sprites/nave.png" id="6_tm630"]
 [ext_resource type="Script" uid="uid://di20tn2k2f6ll" path="res://scripts/panel_mejoras.gd" id="7_hnc56"]
+[ext_resource type="Texture2D" uid="uid://dwitc8lgky5im" path="res://assets/sprites/cerrar.png" id="8_6grgh"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_hnc56"]
 shader = ExtResource("3_tm630")
@@ -413,13 +414,14 @@ text = "Jugar a las navee"
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_7f5op")
 theme_override_font_sizes/font_size = 64
-text = "Play"
+text = "Jugar
+"
 
 [node name="MejorasNaveBtn" type="Button" parent="ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_7f5op")
 theme_override_font_sizes/font_size = 64
-text = "Play"
+text = "Mejoras"
 
 [node name="PointsLabel" type="Label" parent="ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer"]
 layout_mode = 2
@@ -571,49 +573,68 @@ libraries = {
 }
 
 [node name="PanelMejoras" type="Control" parent="."]
-visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -847.0
+offset_bottom = -524.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+mouse_default_cursor_shape = 3
+script = ExtResource("7_hnc56")
+
+[node name="Overlay" type="TextureRect" parent="PanelMejoras"]
+texture_filter = 1
+texture_repeat = 1
+layout_mode = 0
+offset_left = 84.0
+offset_top = 138.0
+offset_right = 210.0
+offset_bottom = 277.0
+texture = ExtResource("8_6grgh")
+stretch_mode = 5
+
+[node name="Panel" type="Panel" parent="PanelMejoras"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("7_hnc56")
-
-[node name="ColorRect" type="ColorRect" parent="PanelMejoras"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="Panel" type="Panel" parent="PanelMejoras"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelMejoras/Panel"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelMejoras/Panel/MarginContainer"]
-layout_mode = 2
-
-[node name="TitleLabel" type="Label" parent="PanelMejoras/Panel/MarginContainer/HBoxContainer"]
-layout_mode = 2
-
-[node name="CloseBtn" type="Button" parent="PanelMejoras/Panel/MarginContainer/HBoxContainer"]
-layout_mode = 2
-
-[node name="PuntosSeparador" type="Label" parent="PanelMejoras/Panel/MarginContainer"]
-layout_mode = 2
-
-[node name="ScrollContainer" type="ScrollContainer" parent="PanelMejoras"]
 layout_mode = 1
-anchors_preset = 9
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
 grow_vertical = 2
 
-[node name="UpgradesVBox" type="VBoxContainer" parent="PanelMejoras/ScrollContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelMejoras/Panel/MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelMejoras/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="PanelMejoras/Panel/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_7f5op")
+text = "Mejoras"
+
+[node name="CloseBtn" type="Button" parent="PanelMejoras/Panel/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_7f5op")
+text = "cerrar"
+
+[node name="PuntosSeparador" type="Label" parent="PanelMejoras/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelMejoras/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="UpgradesVBox" type="VBoxContainer" parent="PanelMejoras/Panel/MarginContainer/VBoxContainer/ScrollContainer"]
 layout_mode = 2
 
 [connection signal="scroll_ended" from="ContenedorBotones/ScrollContainer" to="." method="_on_scroll_container_scroll_ended"]

@@ -19,7 +19,17 @@ func _ready():
 	var nucleo := $ContenedorBotones/ScrollContainer/HBoxContainer/nucleo
 	if nucleo.has_signal("mejoras_solicitadas"):
 		nucleo.mejoras_solicitadas.connect(panel_mejoras.abrir)
- 
+	_actualizar_stats_nave()
+	UpgradeManager.upgrade_purchased.connect(func(_t,_i): _actualizar_stats_nave())
+
+func _actualizar_stats_nave() -> void:
+	var lbl = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/InfoLabel
+	lbl.text = "NAVE\nVelocidad: %d\nVida: %d\nCadencia: %.2fs\nPuntos: %d" % [
+		int(21000 + UpgradeManager.get_ship_stat("max_speed")),
+		5 + int(UpgradeManager.get_ship_stat("max_health")),
+		maxf(0.05, 0.2 - UpgradeManager.get_ship_stat("fire_rate")),
+		UpgradeManager.clicker_points
+	]
 func _on_play_button_pressed():
 	get_tree().change_scene_to_file("res://scenes/game.tscn")
 

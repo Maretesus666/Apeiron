@@ -4,7 +4,7 @@ extends Control
 @onready var title_lbl   := $Panel/MarginContainer/VBoxContainer/HBoxContainer/TitleLabel
 @onready var puntos_lbl  := $Panel/MarginContainer/VBoxContainer/PuntosSeparador
 @onready var upgrades_vb := $Panel/MarginContainer/VBoxContainer/ScrollContainer/UpgradesVBox
-@onready var cerrar_btn  := $Panel/MarginContainer/VBoxContainer/HBoxContainer/CerrarBtn
+@onready var cerrar_btn  := $Panel/MarginContainer/VBoxContainer/HBoxContainer/CloseBtn
 
 const PANEL_X_ABIERTO := 660.0
 const PANEL_X_CERRADO := 1080.0
@@ -64,7 +64,7 @@ func _on_puntos(_v) -> void:
 		_poblar()
 
 func _crear_boton(id: String, tipo: String) -> Button:
- 
+	var upgrades: Dictionary = UpgradeManager.clicker_upgrades if tipo == "clicker" else UpgradeManager.ship_upgrades
 	var cost := UpgradeManager.get_clicker_upgrade_cost(id) if tipo == "clicker" \
 				else UpgradeManager.get_ship_upgrade_cost(id)
 	var pts  := UpgradeManager.game_points if tipo == "clicker" \
@@ -75,12 +75,13 @@ func _crear_boton(id: String, tipo: String) -> Button:
 	btn.autowrap_mode = TextServer.AUTOWRAP_WORD
 	btn.add_theme_font_override("font", load("res://assets/fonts/ultrakill.ttf"))
 	btn.add_theme_font_size_override("font_size", 24)
-	btn.disabled = pts < cost 
+	btn.disabled = pts < cost
+	btn.text = _texto_boton(id, upgrades[id], cost)  # ← ESTA LÍNEA FALTABA
 
 	btn.pressed.connect(func():
 		var ok := UpgradeManager.buy_clicker_upgrade(id) if tipo == "clicker" \
 				  else UpgradeManager.buy_ship_upgrade(id)
-		if ok: _poblar()   # refresca todo el panel
+		if ok: _poblar()
 	)
 	return btn
 

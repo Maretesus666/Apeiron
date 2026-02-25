@@ -1,5 +1,6 @@
 extends PanelContainer
 
+signal mejoras_solicitadas(tipo: String)
 # — Config —
 @export var rotation_speed: float = 0.3        
 @export var click_scale_amount: float = 0.88    
@@ -83,6 +84,8 @@ func _build_ui() -> void:
 	btn_mejoras.add_theme_font_override("font", load("res://assets/fonts/ultrakill.ttf"))
 	btn_mejoras.add_theme_font_size_override("font_size", 30) 
 	vbox.add_child(btn_mejoras)
+	btn_mejoras.pressed.connect(func(): mejoras_solicitadas.emit("nucleo"))
+	
 func _process(delta: float) -> void:
 	# Rotación lenta
 	if nucleo_sprite:
