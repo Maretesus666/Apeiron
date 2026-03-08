@@ -3,16 +3,14 @@ extends Control
 @onready var panel       := $Panel
 @onready var title_lbl   := $Panel/MarginContainer/VBoxContainer/HBoxContainer/TitleLabel
 @onready var puntos_lbl  := $Panel/MarginContainer/VBoxContainer/PuntosSeparador
-@onready var upgrades_vb := $Panel/MarginContainer/VBoxContainer/ScrollContainer/UpgradesVBox
-@onready var cerrar_btn  := $Panel/MarginContainer/VBoxContainer/HBoxContainer/CloseBtn
+@onready var upgrades_vb := $Panel/MarginContainer/VBoxContainer/ScrollContainer/UpgradesVBox 
 
-const PANEL_X_ABIERTO := 660.0
+const PANEL_X_ABIERTO := 900.0
 const PANEL_X_CERRADO := 1080.0
 var _tween: Tween
 var _tipo_actual := ""
 
-func _ready() -> void:
-	cerrar_btn.pressed.connect(cerrar)
+func _ready() -> void: 
 	$Overlay.gui_input.connect(func(e):
 		if e is InputEventMouseButton and e.pressed: cerrar()
 	)

@@ -5,7 +5,7 @@
 [ext_resource type="FontFile" uid="uid://bjkvctpyibltk" path="res://assets/fonts/ultrakill.ttf" id="2_7f5op"]
 [ext_resource type="Shader" uid="uid://cvu8ucill03dy" path="res://shaders/menu.gdshader" id="3_tm630"]
 [ext_resource type="Script" uid="uid://mvfa7t62eqnm" path="res://scenes/nucleo.gd" id="4_tm630"]
-[ext_resource type="Texture2D" uid="uid://dsqmf3qkp4ovd" path="res://assets/sprites/nave.png" id="6_tm630"]
+[ext_resource type="Texture2D" uid="uid://dsqmf3qkp4ovd" path="res://assets/sprites/nave1.png" id="6_tm630"]
 [ext_resource type="Script" uid="uid://di20tn2k2f6ll" path="res://scripts/panel_mejoras.gd" id="7_hnc56"]
 [ext_resource type="Texture2D" uid="uid://dwitc8lgky5im" path="res://assets/sprites/cerrar.png" id="8_6grgh"]
 
@@ -341,6 +341,7 @@ script = ExtResource("2_1t77w")
 layer = -1
 
 [node name="Fondo" type="ColorRect" parent="FondoGenerado"]
+visible = false
 z_index = -1
 material = SubResource("ShaderMaterial_hnc56")
 anchors_preset = -1
@@ -403,17 +404,19 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_tm630")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer/Nave"]
 layout_mode = 2
+theme_override_constants/separation = 8
 
 [node name="InfoLabel" type="Label" parent="ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_7f5op")
-theme_override_font_sizes/font_size = 64
+theme_override_font_sizes/font_size = 32
 text = "Jugar a las navee"
+horizontal_alignment = 1
 
 [node name="PlayButton" type="Button" parent="ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_7f5op")
-theme_override_font_sizes/font_size = 64
+theme_override_font_sizes/font_size = 32
 text = "Jugar
 "
 
@@ -586,13 +589,15 @@ mouse_default_cursor_shape = 3
 script = ExtResource("7_hnc56")
 
 [node name="Overlay" type="TextureRect" parent="PanelMejoras"]
+z_index = 1
 texture_filter = 1
 texture_repeat = 1
 layout_mode = 0
-offset_left = 84.0
-offset_top = 138.0
-offset_right = 210.0
-offset_bottom = 277.0
+offset_left = 850.0
+offset_right = 900.0
+offset_bottom = 55.158722
+mouse_filter = 0
+mouse_default_cursor_shape = 4
 texture = ExtResource("8_6grgh")
 stretch_mode = 5
 
@@ -611,9 +616,11 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelMejoras/Panel/MarginContainer"]
 layout_mode = 2
+theme_override_constants/separation = 10
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelMejoras/Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -622,11 +629,6 @@ layout_mode = 2
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_7f5op")
 text = "Mejoras"
-
-[node name="CloseBtn" type="Button" parent="PanelMejoras/Panel/MarginContainer/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_7f5op")
-text = "cerrar"
 
 [node name="PuntosSeparador" type="Label" parent="PanelMejoras/Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2

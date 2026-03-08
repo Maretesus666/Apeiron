@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
-@export var base_acceleration: float = 7000.0
-@export var base_max_speed: float = 21000.0
+@export var base_acceleration: float = 3000.0
+@export var base_max_speed: float = 4000.0
 @export var friction: float = 0.0
 @export var rotation_speed: float = 5.0
 @export var base_max_health: int = 5
@@ -10,7 +10,6 @@ extends CharacterBody2D
 @export var shoot_shake_duration: float = 0.1
 @export var damage_shake_amount: float = 10.0
 @export var damage_shake_duration: float = 0.3
-
 # Stats mejorados
 var acceleration: float
 var max_speed: float
