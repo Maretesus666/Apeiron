@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://nn6rx2sec51g" path="res://scripts/background_generator.gd" id="2_1t77w"]
 [ext_resource type="FontFile" uid="uid://bjkvctpyibltk" path="res://assets/fonts/ultrakill.ttf" id="2_7f5op"]
 [ext_resource type="Shader" uid="uid://cvu8ucill03dy" path="res://shaders/menu.gdshader" id="3_tm630"]
-[ext_resource type="Script" uid="uid://mvfa7t62eqnm" path="res://scenes/nucleo.gd" id="4_tm630"]
+[ext_resource type="Script" uid="uid://mvfa7t62eqnm" path="res://scripts/nucleo.gd" id="4_tm630"]
 [ext_resource type="Texture2D" uid="uid://dsqmf3qkp4ovd" path="res://assets/sprites/nave1.png" id="6_tm630"]
 [ext_resource type="Script" uid="uid://di20tn2k2f6ll" path="res://scripts/panel_mejoras.gd" id="7_hnc56"]
 [ext_resource type="Texture2D" uid="uid://dwitc8lgky5im" path="res://assets/sprites/cerrar.png" id="8_6grgh"]

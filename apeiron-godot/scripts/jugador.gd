@@ -1,10 +1,10 @@
 extends CharacterBody2D
 
 # ─── Movimiento ───────────────────────────────────────────────────────────────
-@export var thrust_acceleration: float  = 400.0
-@export var brake_strength: float       = 25000.0
+@export var thrust_acceleration: float  = 4000.0
+@export var brake_strength: float       = 2500.0
 @export var lateral_strength: float     = 1200.0
-@export var max_speed: float            = 50000.0
+@export var max_speed: float            = 5000.0
 @export var damping: float              = 0
 
 # ─── Apuntado ─────────────────────────────────────────────────────────────────
@@ -36,6 +36,9 @@ var bullet := preload("res://scenes/bala.tscn")
 var thruster_left:  CPUParticles2D
 var thruster_right: CPUParticles2D
 
+# ─── Controles móviles ────────────────────────────────────────────────────────
+var _mobile: Node = null
+
 signal health_changed(new_health, max_health)
 signal player_died
 
@@ -44,6 +47,8 @@ func _ready() -> void:
 	current_health = max_health
 	_setup_particles()
 	health_changed.emit(current_health, max_health)
+	await get_tree().process_frame
+	_mobile = get_tree().get_first_node_in_group("mobile_controls")
 
 func _apply_upgrades() -> void:
 	max_speed  = max_speed + UpgradeManager.get_ship_stat("max_speed")
@@ -56,12 +61,28 @@ func _physics_process(delta: float) -> void:
 	_handle_rotation(delta)
 	_handle_movement(delta)
 	_update_particles()
-	if Input.is_action_pressed("shoot") and fire_cooldown <= 0.0:
+	var can_shoot: bool
+	if ConfigManager.mobile_controls_enabled:
+		# En modo móvil: solo el botón FIRE dispara
+		can_shoot = _mobile != null and _mobile.shooting
+	else:
+		# En modo PC: solo mouse/teclado dispara
+		can_shoot = Input.is_action_pressed("shoot")
+	if can_shoot and fire_cooldown <= 0.0:
 		_shoot()
 
 # ─── Rotación ─────────────────────────────────────────────────────────────────
 func _handle_rotation(delta: float) -> void:
-	var target_angle := global_position.angle_to_point(get_global_mouse_position()) + PI
+	var target_angle: float
+	if ConfigManager.mobile_controls_enabled and _mobile != null and _mobile.joy_angle >= -0.5:
+		# Móvil: rotar hacia donde apunta el joystick
+		target_angle = _mobile.joy_angle
+	elif not ConfigManager.mobile_controls_enabled:
+		# PC: rotar hacia el mouse
+		target_angle = global_position.angle_to_point(get_global_mouse_position()) + PI
+	else:
+		# Móvil activo pero joystick en reposo: mantener rotación actual
+		return
 	rotation = lerp_angle(rotation, target_angle, rotation_speed * delta)
 
 # ─── Movimiento ───────────────────────────────────────────────────────────────
@@ -69,34 +90,44 @@ func _handle_movement(delta: float) -> void:
 	var forward: Vector2 = Vector2.RIGHT.rotated(rotation)
 	var right: Vector2   = Vector2.DOWN.rotated(rotation)
 
-	if Input.is_action_pressed("move_up"):
-		var accel: float = thrust_acceleration + UpgradeManager.get_ship_stat("acceleration")
-		velocity += forward * accel * delta
+	# ── Leer input: teclado + joystick ───────────────────────────────────────
+	var joy: Vector2 = Vector2.ZERO
+	if _mobile != null:
+		joy = _mobile.movement  # X = lateral, Y = adelante/atrás
 
-	if Input.is_action_pressed("move_down"):
+	var pressing_w: bool = Input.is_action_pressed("move_up")    or joy.y < -0.1
+	var pressing_s: bool = Input.is_action_pressed("move_down")  or joy.y >  0.1
+	var pressing_a: bool = Input.is_action_pressed("move_left")  or joy.x < -0.1
+	var pressing_d: bool = Input.is_action_pressed("move_right") or joy.x >  0.1
+
+	# ── Thrust (adelante) ─────────────────────────────────────────────────────
+	if pressing_w:
+		var accel: float = thrust_acceleration + UpgradeManager.get_ship_stat("acceleration")
+		var joy_scale: float = absf(joy.y) if joy.y < -0.1 else 1.0
+		velocity += forward * accel * joy_scale * delta
+
+	# ── Freno (atrás) ─────────────────────────────────────────────────────────
+	if pressing_s:
 		if velocity.length() > 10.0:
 			velocity -= velocity.normalized() * brake_strength * delta
 		else:
 			velocity = Vector2.ZERO
 
-	if Input.is_action_pressed("move_left"):
-		velocity -= right * lateral_strength * delta
-	if Input.is_action_pressed("move_right"):
-		velocity += right * lateral_strength * delta
+	# ── Lateral ───────────────────────────────────────────────────────────────
+	if pressing_a:
+		var scale_a: float = absf(joy.x) if joy.x < -0.1 else 1.0
+		velocity -= right * lateral_strength * scale_a * delta
+	if pressing_d:
+		var scale_d: float = absf(joy.x) if joy.x >  0.1 else 1.0
+		velocity += right * lateral_strength * scale_d * delta
 
-	# Boost: W + A + D simultáneamente da un empuje extra hacia adelante
-	if (Input.is_action_pressed("move_up") and
-			Input.is_action_pressed("move_left") and
-			Input.is_action_pressed("move_right")):
+	# ── Boost: adelante + ambos lados ─────────────────────────────────────────
+	if pressing_w and pressing_a and pressing_d:
 		var boost_accel: float = thrust_acceleration + UpgradeManager.get_ship_stat("acceleration")
 		velocity += forward * boost_accel * 0.6 * delta
 
-	var has_input: bool = (
-		Input.is_action_pressed("move_up") or
-		Input.is_action_pressed("move_down") or
-		Input.is_action_pressed("move_left") or
-		Input.is_action_pressed("move_right")
-	)
+	# ── Amortiguación pasiva ──────────────────────────────────────────────────
+	var has_input: bool = pressing_w or pressing_s or pressing_a or pressing_d
 	if not has_input:
 		velocity = velocity.lerp(Vector2.ZERO, damping * delta)
 
@@ -174,7 +205,7 @@ func _make_burst(pos: Vector2, amount: int, lifetime: float,
 	p.amount               = amount
 	p.lifetime             = lifetime
 	p.explosiveness        = 1.0
-	p.spread               = 180
+	p.spread               = 18
 	p.initial_velocity_min = vel_min
 	p.initial_velocity_max = vel_max
 	p.scale_amount_min     = scale_min
@@ -187,21 +218,15 @@ func _make_burst(pos: Vector2, amount: int, lifetime: float,
 		p.queue_free()
 
 # ─── Setup de partículas ──────────────────────────────────────────────────────
-# La nave apunta hacia Vector2.RIGHT (eje X local).
-# "Detrás" en espacio local = X negativa → direction = Vector2(-1, 0)
-# local_coords = true hace que todo se mueva con la rotación de la nave.
-# Las posiciones son en píxeles locales; la nave mide ~54px (radio colisión 27px).
-
 func _setup_particles() -> void:
 
-	# ── Thruster principal — sale del centro trasero de la nave ───────────────
 	thruster_main.emitting               = false
-	thruster_main.local_coords           = true        # ← rota con la nave
+	thruster_main.local_coords           = true
 	thruster_main.amount                 = 30
 	thruster_main.lifetime               = 0.38
 	thruster_main.emission_shape         = CPUParticles2D.EMISSION_SHAPE_SPHERE
 	thruster_main.emission_sphere_radius = 3.5
-	thruster_main.direction              = Vector2(-1, 0)  # atrás en local
+	thruster_main.direction              = Vector2(-1, 0)
 	thruster_main.spread                 = 12.0
 	thruster_main.gravity                = Vector2.ZERO
 	thruster_main.initial_velocity_min   = 240.0
@@ -215,29 +240,24 @@ func _setup_particles() -> void:
 		Color(0.6, 0.1, 0.0, 0.3),
 		Color(0.0, 0.0, 0.0, 0.0)
 	])
-	# Posición: detrás del sprite (X negativa = cola de la nave)
 	thruster_main.position               = Vector2(-22, 0)
 
-	# ── Thruster lateral izquierdo — costado superior (Y negativa en local) ──
-	# Al presionar A expulsa hacia afuera: dirección -Y local (hacia arriba)
 	thruster_left = _make_lateral_thruster(
-		Vector2(0, 28),   # costado izquierdo de la nave
-		Vector2(-0.5, 1)     # sale perpendicular hacia afuera (izquierda)
+		Vector2(0, 28),
+		Vector2(-0.5, 1).normalized()
 	)
 	add_child(thruster_left)
 
-	# ── Thruster lateral derecho — costado inferior (Y positiva en local) ────
-	# Al presionar D expulsa hacia afuera: dirección +Y local (hacia abajo)
 	thruster_right = _make_lateral_thruster(
-		Vector2(0, -28),    # costado derecho de la nave
-		Vector2(-0.5, -1)      # sale perpendicular hacia afuera (derecha)
+		Vector2(0, -28),
+		Vector2(-0.5, -1).normalized()
 	)
 	add_child(thruster_right)
 
 func _make_lateral_thruster(offset: Vector2, local_dir: Vector2) -> CPUParticles2D:
 	var p := CPUParticles2D.new()
 	p.emitting               = false
-	p.local_coords           = true          # ← rota con la nave
+	p.local_coords           = true
 	p.amount                 = 14
 	p.lifetime               = 0.22
 	p.emission_shape         = CPUParticles2D.EMISSION_SHAPE_SPHERE
@@ -268,19 +288,21 @@ func _make_gradient(colors: Array) -> Gradient:
 	return g
 
 # ─── Update de partículas ─────────────────────────────────────────────────────
-# Con local_coords=true las direcciones son locales → no hay que calcular
-# vectores rotados manualmente. Solo actualizamos intensidad y emitting.
-
 func _update_particles() -> void:
 	var spd: float       = velocity.length()
 	var intensity: float = clampf(spd / max_speed, 0.0, 1.0)
 
-	var pressing_w: bool = Input.is_action_pressed("move_up")
-	var pressing_a: bool = Input.is_action_pressed("move_left")
-	var pressing_d: bool = Input.is_action_pressed("move_right")
+	# Leer input de teclado + joystick para las partículas
+	var joy: Vector2 = Vector2.ZERO
+	if _mobile != null:
+		joy = _mobile.movement
 
-	# ── Thruster principal — sin inclinación, siempre recto hacia atrás ─────
-	thruster_main.emitting             = pressing_w
+	var pressing_w: bool = Input.is_action_pressed("move_up")   or joy.y < -0.1
+	var pressing_a: bool = Input.is_action_pressed("move_left") or joy.x < -0.1
+	var pressing_d: bool = Input.is_action_pressed("move_right") or joy.x >  0.1
+
+	# ── Thruster principal ────────────────────────────────────────────────────
+	thruster_main.emitting = pressing_w
 	if pressing_w:
 		thruster_main.direction            = Vector2(-1.0, 0.0)
 		thruster_main.initial_velocity_min = 200.0 + 220.0 * intensity
@@ -289,11 +311,10 @@ func _update_particles() -> void:
 		thruster_main.scale_amount_max     = 4.5  + 5.0  * intensity
 		thruster_main.lifetime             = 0.28 + 0.22 * intensity
 
-	# ── Thrusters laterales — se activan con A/D siempre, con o sin W ────────
+	# ── Thrusters laterales ───────────────────────────────────────────────────
 	var boost_active: bool = pressing_w and pressing_a and pressing_d
-	thruster_left.emitting  = pressing_a
+	thruster_left.emitting = pressing_a
 	if pressing_a:
-		# Intensidad mayor durante el boost
 		var boost_mult: float = 1.5 if boost_active else 1.0
 		thruster_left.initial_velocity_min = (120.0 + 100.0 * intensity) * boost_mult
 		thruster_left.initial_velocity_max = (200.0 + 140.0 * intensity) * boost_mult

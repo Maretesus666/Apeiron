@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://bcq45ypkaysta"]
 
 [ext_resource type="Script" uid="uid://deo2rgxhri75e" path="res://scripts/jugador.gd" id="1_st4uy"]
-[ext_resource type="Texture2D" path="res://assets/sprites/nave1.png" id="1_xbmdn"]
+[ext_resource type="Texture2D" uid="uid://dsqmf3qkp4ovd" path="res://assets/sprites/nave1.png" id="1_xbmdn"]
 [ext_resource type="PackedScene" uid="uid://k3mgp21netck" path="res://scenes/bala.tscn" id="3_r2ihm"]
 [ext_resource type="Script" uid="uid://chch6oeolhd3b" path="res://scripts/camera_2d.gd" id="4_k64kw"]
 
@@ -10,6 +10,18 @@ radius = 270.1851
 
 [node name="jugador" type="CharacterBody2D" groups=["player", "player_bullet"]]
 script = ExtResource("1_st4uy")
+thrust_acceleration = null
+brake_strength = null
+lateral_strength = null
+max_speed = null
+damping = null
+rotation_speed = null
+base_fire_rate = null
+base_max_health = null
+shoot_shake_amount = null
+shoot_shake_duration = null
+damage_shake_amount = null
+damage_shake_duration = null
 
 [node name="Bala" parent="." instance=ExtResource("3_r2ihm")]
 scale = Vector2(0.1, 0.1)
@@ -38,3 +50,4 @@ script = ExtResource("4_k64kw")
 jugador = NodePath("..")
 
 [node name="ThrusterParticles" type="CPUParticles2D" parent="."]
+emitting = false

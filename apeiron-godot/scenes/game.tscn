@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://dn7ruopjurr62"]
+[gd_scene load_steps=13 format=3 uid="uid://dn7ruopjurr62"]
 
 [ext_resource type="Shader" uid="uid://cvu8ucill03dy" path="res://shaders/menu.gdshader" id="1_5evyv"]
 [ext_resource type="Script" uid="uid://nn6rx2sec51g" path="res://scripts/background_generator.gd" id="1_p57ef"]
@@ -6,9 +6,10 @@
 [ext_resource type="Script" uid="uid://j7y4uc0ptpcw" path="res://scripts/enemy_spawner.gd" id="3_lnu2h"]
 [ext_resource type="Script" uid="uid://cja7mxo22kr21" path="res://scripts/hud.gd" id="4_lbhrr"]
 [ext_resource type="Script" uid="uid://chcvjb21vhfgy" path="res://scripts/pause_menu.gd" id="6_u5sy4"]
-[ext_resource type="Script" uid="uid://nnpxtjjuei6h" path="res://scenes/minimap.gd" id="7_0tnpc"]
+[ext_resource type="Script" uid="uid://nnpxtjjuei6h" path="res://scripts/minimap.gd" id="7_0tnpc"]
 [ext_resource type="FontFile" uid="uid://bjkvctpyibltk" path="res://assets/fonts/ultrakill.ttf" id="7_u5sy4"]
 [ext_resource type="Script" uid="uid://bo5eagd8cxhd6" path="res://scripts/enemy_indicators.gd" id="8_vtaks"]
+[ext_resource type="Script" uid="uid://d08m6io46qskt" path="res://scripts/mobile_controls.gd" id="10_vtaks"]
 
 [sub_resource type="GDScript" id="GDScript_lbhrr"]
 script/source = "extends Node2D
@@ -73,6 +74,7 @@ script = ExtResource("4_lbhrr")
 [node name="HealthContainer" type="VBoxContainer" parent="HUD"]
 offset_right = 40.0
 offset_bottom = 40.0
+theme_override_constants/separation = 20
 
 [node name="HealthLabel" type="Label" parent="HUD/HealthContainer"]
 layout_mode = 2
@@ -185,6 +187,9 @@ size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("7_u5sy4")
 theme_override_font_sizes/font_size = 64
 text = "VOLVER AL MENU"
+
+[node name="Mobile_controls" type="CanvasLayer" parent="." groups=["mobile_controls"]]
+script = ExtResource("10_vtaks")
 
 [connection signal="pressed" from="PauseMenu/Panel/VBoxContainer/ResumeButton" to="PauseMenu" method="_on_resume_button_pressed"]
 [connection signal="pressed" from="PauseMenu/Panel/VBoxContainer/RestartButton" to="PauseMenu" method="_on_restart_button_pressed"]

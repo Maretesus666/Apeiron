@@ -1,8 +1,8 @@
 extends Area2D
 
 # ─── Stats base ───────────────────────────────────────────────────────────────
-@export var acceleration: float   = 600.0
-@export var max_speed: float      = 1800.0
+@export var acceleration: float   = 6000.0
+@export var max_speed: float      = 18000.0
 @export var friction: float       = 0.0
 @export var health: int           = 3
 @export var damage: int           = 1
