@@ -1,10 +1,10 @@
 extends CharacterBody2D
 
 # ─── Movimiento ───────────────────────────────────────────────────────────────
-@export var thrust_acceleration: float  = 4000.0
-@export var brake_strength: float       = 2500.0
+@export var thrust_acceleration: float  = 400.0
+@export var brake_strength: float       = 25000.0
 @export var lateral_strength: float     = 1200.0
-@export var max_speed: float            = 5000.0
+@export var max_speed: float            = 50000.0
 @export var damping: float              = 0
 
 # ─── Apuntado ─────────────────────────────────────────────────────────────────
@@ -83,6 +83,13 @@ func _handle_movement(delta: float) -> void:
 		velocity -= right * lateral_strength * delta
 	if Input.is_action_pressed("move_right"):
 		velocity += right * lateral_strength * delta
+
+	# Boost: W + A + D simultáneamente da un empuje extra hacia adelante
+	if (Input.is_action_pressed("move_up") and
+			Input.is_action_pressed("move_left") and
+			Input.is_action_pressed("move_right")):
+		var boost_accel: float = thrust_acceleration + UpgradeManager.get_ship_stat("acceleration")
+		velocity += forward * boost_accel * 0.6 * delta
 
 	var has_input: bool = (
 		Input.is_action_pressed("move_up") or
@@ -272,31 +279,31 @@ func _update_particles() -> void:
 	var pressing_a: bool = Input.is_action_pressed("move_left")
 	var pressing_d: bool = Input.is_action_pressed("move_right")
 
-	# ── Thruster principal ────────────────────────────────────────────────────
-	thruster_main.emitting = pressing_w
+	# ── Thruster principal — sin inclinación, siempre recto hacia atrás ─────
+	thruster_main.emitting             = pressing_w
 	if pressing_w:
-		# Inclinación lateral en espacio local: Y positiva = costado inferior
-		var dir_x: float = -1.0
-		var dir_y: float = 0.0
-		if pressing_a:
-			dir_y =  0.4   # el chorro se inclina hacia el costado opuesto al strafe
-		elif pressing_d:
-			dir_y = -0.4
-		thruster_main.direction            = Vector2(dir_x, dir_y).normalized()
+		thruster_main.direction            = Vector2(-1.0, 0.0)
 		thruster_main.initial_velocity_min = 200.0 + 220.0 * intensity
 		thruster_main.initial_velocity_max = 320.0 + 340.0 * intensity
 		thruster_main.scale_amount_min     = 2.0  + 2.5  * intensity
 		thruster_main.scale_amount_max     = 4.5  + 5.0  * intensity
 		thruster_main.lifetime             = 0.28 + 0.22 * intensity
 
-	# ── Thrusters laterales ───────────────────────────────────────────────────
-	# Solo visibles sin thrust principal para no solaparse
-	thruster_left.emitting  = pressing_a and not pressing_w
-	if pressing_a and not pressing_w:
-		thruster_left.initial_velocity_min = 120.0 + 100.0 * intensity
-		thruster_left.initial_velocity_max = 200.0 + 140.0 * intensity
+	# ── Thrusters laterales — se activan con A/D siempre, con o sin W ────────
+	var boost_active: bool = pressing_w and pressing_a and pressing_d
+	thruster_left.emitting  = pressing_a
+	if pressing_a:
+		# Intensidad mayor durante el boost
+		var boost_mult: float = 1.5 if boost_active else 1.0
+		thruster_left.initial_velocity_min = (120.0 + 100.0 * intensity) * boost_mult
+		thruster_left.initial_velocity_max = (200.0 + 140.0 * intensity) * boost_mult
+		thruster_left.scale_amount_min     = 1.5 + (1.0 if boost_active else 0.0)
+		thruster_left.scale_amount_max     = 3.0 + (1.5 if boost_active else 0.0)
 
-	thruster_right.emitting = pressing_d and not pressing_w
-	if pressing_d and not pressing_w:
-		thruster_right.initial_velocity_min = 120.0 + 100.0 * intensity
-		thruster_right.initial_velocity_max = 200.0 + 140.0 * intensity
+	thruster_right.emitting = pressing_d
+	if pressing_d:
+		var boost_mult: float = 1.5 if boost_active else 1.0
+		thruster_right.initial_velocity_min = (120.0 + 100.0 * intensity) * boost_mult
+		thruster_right.initial_velocity_max = (200.0 + 140.0 * intensity) * boost_mult
+		thruster_right.scale_amount_min     = 1.5 + (1.0 if boost_active else 0.0)
+		thruster_right.scale_amount_max     = 3.0 + (1.5 if boost_active else 0.0)
