@@ -1,23 +1,32 @@
 extends CharacterBody2D
 
-@export var thrust_acceleration: float  = 6000.0
-@export var brake_strength: float       = 2500.0
-@export var lateral_strength: float     = 1200.0
-@export var max_speed: float            = 6000.0
-@export var damping: float              = 0
-
-@export var rotation_speed: float       = 8.0
-@export var base_fire_rate: float       = 0.2
-@export var base_max_health: int        = 5
+@export var base_thrust_acceleration: float  = 6000.0
+@export var base_brake_strength: float       = 2500.0
+@export var base_lateral_strength: float     = 1200.0
+@export var base_max_speed: float            = 6000.0
+@export var damping: float                   = 0
+@export var base_rotation_speed: float       = 8.0
+@export var base_fire_rate: float            = 0.2
+@export var base_max_health: int             = 5
 
 @export var shoot_shake_amount: float    = 2.0
 @export var shoot_shake_duration: float  = 0.08
 @export var damage_shake_amount: float   = 10.0
 @export var damage_shake_duration: float = 0.3
 
+# Stats actuales (base + upgrades)
+var thrust_acceleration: float
+var lateral_strength: float
+var max_speed: float
+var rotation_speed: float
 var max_health: int
 var current_health: int
 var fire_rate: float
+var bullet_speed: float
+var bullet_damage: int
+var thrust_power: float
+var lateral_agility: float
+
 var fire_cooldown: float = 0.0
 var is_shaking: bool     = false
 
@@ -36,7 +45,6 @@ signal health_changed(new_health, max_health)
 signal player_died
 
 func _ready() -> void:
-	# Detección de colisiones continua para velocidades extremas
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	_apply_upgrades()
 	current_health = max_health
@@ -46,25 +54,40 @@ func _ready() -> void:
 	_mobile = get_tree().get_first_node_in_group("mobile_controls")
 
 func _apply_upgrades() -> void:
-	max_speed  = max_speed + UpgradeManager.get_ship_stat("max_speed")
+	# Aplicar todas las mejoras de nave
+	max_speed = base_max_speed + UpgradeManager.get_ship_stat("max_speed")
+	thrust_acceleration = base_thrust_acceleration + UpgradeManager.get_ship_stat("acceleration")
 	max_health = base_max_health + int(UpgradeManager.get_ship_stat("max_health"))
+	
+	# Fire rate (reducir tiempo entre disparos)
 	var fire_rate_bonus: float = UpgradeManager.get_ship_stat("fire_rate")
 	fire_rate = maxf(0.05, base_fire_rate - fire_rate_bonus)
+	
+	# Nuevas mejoras
+	bullet_speed = 1000.0 + UpgradeManager.get_ship_stat("bullet_speed")
+	bullet_damage = 1 + int(UpgradeManager.get_ship_stat("bullet_damage"))
+	thrust_power = base_thrust_acceleration + UpgradeManager.get_ship_stat("thrust_power")
+	lateral_agility = base_lateral_strength + UpgradeManager.get_ship_stat("lateral_agility")
+	rotation_speed = base_rotation_speed + UpgradeManager.get_ship_stat("rotation_speed")
+	
+	# Actualizar lateral strength con la mejora
+	lateral_strength = lateral_agility
 
 func _physics_process(delta: float) -> void:
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
 	_handle_rotation(delta)
 	_handle_movement(delta)
 	_update_particles()
+	
 	var can_shoot: bool
 	if ConfigManager.mobile_controls_enabled:
 		can_shoot = _mobile != null and _mobile.shooting
 	else:
 		can_shoot = Input.is_action_pressed("shoot")
+	
 	if can_shoot and fire_cooldown <= 0.0:
 		_shoot()
 
-# ─── Rotación ─────────────────────────────────────────────────────────────────
 func _handle_rotation(delta: float) -> void:
 	var target_angle: float
 	if ConfigManager.mobile_controls_enabled and _mobile != null:
@@ -73,27 +96,24 @@ func _handle_rotation(delta: float) -> void:
 		target_angle = _mobile.joy_angle
 	else:
 		target_angle = global_position.angle_to_point(get_global_mouse_position()) + PI
+	
+	# Usar rotation_speed con mejoras
 	rotation = lerp_angle(rotation, target_angle, rotation_speed * delta)
 
-# ─── Movimiento con substepping ───────────────────────────────────────────────
-# A velocidades extremas dividimos el delta en pasos pequeños para que
-# move_and_slide() no salte colisiones ni salga del rango de render.
-const MAX_STEP_DISTANCE: float = 500.0   # px máximos por substep
+const MAX_STEP_DISTANCE: float = 500.0
 
 func _handle_movement(delta: float) -> void:
-	# ── MÓVIL ─────────────────────────────────────────────────────────────────
 	if ConfigManager.mobile_controls_enabled and _mobile != null:
 		var joy: Vector2 = _mobile.movement
 		if joy.length() > 0.05:
-			var accel: float = thrust_acceleration + UpgradeManager.get_ship_stat("acceleration")
-			velocity += joy * accel * delta
+			# Usar thrust_power en lugar de acceleration básica
+			velocity += joy * thrust_power * delta
 		var spd: float = velocity.length()
 		if spd > max_speed:
 			velocity = velocity * (max_speed / spd)
 		_substep_move(delta)
 		return
 
-	# ── PC ────────────────────────────────────────────────────────────────────
 	var forward: Vector2 = Vector2.RIGHT.rotated(rotation)
 	var right: Vector2   = Vector2.DOWN.rotated(rotation)
 
@@ -103,20 +123,21 @@ func _handle_movement(delta: float) -> void:
 	var pressing_d: bool = Input.is_action_pressed("move_right")
 
 	if pressing_w:
-		var accel: float = thrust_acceleration + UpgradeManager.get_ship_stat("acceleration")
-		velocity += forward * accel * delta
+		# Usar thrust_power mejorada
+		velocity += forward * thrust_power * delta
 	if pressing_s:
 		if velocity.length() > 10.0:
-			velocity -= velocity.normalized() * brake_strength * delta
+			velocity -= velocity.normalized() * base_brake_strength * delta
 		else:
 			velocity = Vector2.ZERO
 	if pressing_a:
+		# Usar lateral_agility mejorada
 		velocity -= right * lateral_strength * delta
 	if pressing_d:
 		velocity += right * lateral_strength * delta
 	if pressing_w and pressing_a and pressing_d:
-		var boost_accel: float = thrust_acceleration + UpgradeManager.get_ship_stat("acceleration")
-		velocity += forward * boost_accel * 0.6 * delta
+		# Boost con thrust_power
+		velocity += forward * thrust_power * 0.6 * delta
 
 	var has_input: bool = pressing_w or pressing_s or pressing_a or pressing_d
 	if not has_input:
@@ -129,28 +150,34 @@ func _handle_movement(delta: float) -> void:
 	_substep_move(delta)
 
 func _substep_move(delta: float) -> void:
-	# Calcular cuántos substeps necesitamos para que ninguno mueva más de MAX_STEP_DISTANCE
 	var distance_this_frame: float = velocity.length() * delta
 	var steps: int = max(1, int(ceil(distance_this_frame / MAX_STEP_DISTANCE)))
 	var sub_delta: float = delta / float(steps)
 
 	for _i in range(steps):
 		move_and_slide()
-		# Pequeña pausa implícita — la posición se acumula entre substeps
 
-# ─── Disparo ──────────────────────────────────────────────────────────────────
 func _shoot() -> void:
 	fire_cooldown = fire_rate
 	var newBullet := bullet.instantiate()
 	newBullet.global_position = puntoDisparo.global_position
+	
+	# Pasar velocidad mejorada y daño como metadata
 	if newBullet.has_method("initialize"):
 		newBullet.initialize(velocity, rotation)
 	else:
 		newBullet.rotation = rotation
+	
+	# Aplicar bullet_speed mejorada
+	if "base_speed" in newBullet:
+		newBullet.base_speed = bullet_speed
+	
+	# Pasar daño mejorado
+	newBullet.set_meta("damage", bullet_damage)
+	
 	get_parent().add_child(newBullet)
 	apply_shake(shoot_shake_amount, shoot_shake_duration)
 
-# ─── Daño / Muerte ────────────────────────────────────────────────────────────
 func take_damage(amount: int) -> void:
 	current_health -= amount
 	health_changed.emit(current_health, max_health)
@@ -206,7 +233,7 @@ func _make_burst(pos: Vector2, amount: int, lifetime: float,
 	p.amount               = amount
 	p.lifetime             = lifetime
 	p.explosiveness        = 1.0
-	p.spread               = 18
+	p.spread               = 180
 	p.initial_velocity_min = vel_min
 	p.initial_velocity_max = vel_max
 	p.scale_amount_min     = scale_min
@@ -218,7 +245,6 @@ func _make_burst(pos: Vector2, amount: int, lifetime: float,
 	if is_instance_valid(p):
 		p.queue_free()
 
-# ─── Partículas (idéntico al original) ───────────────────────────────────────
 func _setup_particles() -> void:
 	thruster_main.emitting               = false
 	thruster_main.local_coords           = true

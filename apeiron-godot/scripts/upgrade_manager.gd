@@ -147,8 +147,22 @@ func load_data():
 		if save_data:
 			clicker_points = save_data.get("clicker_points", 0)
 			game_points = save_data.get("game_points", 0)
-			ship_upgrades = save_data.get("ship_upgrades", ship_upgrades)
-			clicker_upgrades = save_data.get("clicker_upgrades", clicker_upgrades)
+			
+			# Cargar upgrades guardadas
+			var loaded_ship = save_data.get("ship_upgrades", {})
+			var loaded_clicker = save_data.get("clicker_upgrades", {})
+			
+			# Migrar: agregar mejoras nuevas que no existían antes
+			_migrate_upgrades(ship_upgrades, loaded_ship)
+			_migrate_upgrades(clicker_upgrades, loaded_clicker)
+
+# Función auxiliar para migrar upgrades viejas a nuevas
+func _migrate_upgrades(default_dict: Dictionary, loaded_dict: Dictionary) -> void:
+	for key in default_dict.keys():
+		if key in loaded_dict:
+			# Mantener nivel guardado pero actualizar otros valores
+			default_dict[key]["level"] = loaded_dict[key].get("level", 0)
+		# Si no existe en loaded_dict, se queda con valores por defecto (level = 0)
 
 func reset_all_data():
 	clicker_points = 0

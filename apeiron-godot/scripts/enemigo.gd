@@ -29,7 +29,6 @@ var _is_enraged:   bool  = false
 var _player_vel_history: Array[Vector2] = []
 const HISTORY_SIZE := 4
 
-# Para detección de impactos a alta velocidad usamos un timer de proximidad
 var _damage_cooldown: float = 0.0
 
 func _ready() -> void:
@@ -52,8 +51,6 @@ func _physics_process(delta: float) -> void:
 	_update_rage()
 	_update_player_history()
 
-	# Detección de proximidad para velocidades extremas del jugador
-	# (las señales de colisión pueden fallar si la bala "salta" el enemigo)
 	_check_player_proximity(delta)
 
 	var eff_max_speed: float = max_speed * (rage_speed_mult if _is_enraged else 1.0)
@@ -70,19 +67,16 @@ func _physics_process(delta: float) -> void:
 	_smooth_rotation(delta)
 
 func _check_player_proximity(delta: float) -> void:
-	# Si el jugador va muy rápido las señales pueden fallar.
-	# Comprobamos distancia directamente cada frame como respaldo.
 	if _damage_cooldown > 0.0:
 		return
 	if not is_instance_valid(player):
 		return
-	# Radio de colisión aproximado (nave pequeña ~27px por el scale 0.1 del collider)
 	var collision_radius: float = 30.0
 	var dist: float = global_position.distance_to(player.global_position)
 	if dist < collision_radius:
 		if player.has_method("take_damage"):
 			player.take_damage(damage)
-		_damage_cooldown = 0.5   # medio segundo de cooldown para no spamear daño
+		_damage_cooldown = 0.5
 		die()
 
 func _compute_direction(delta: float) -> Vector2:
@@ -257,5 +251,12 @@ func _on_body_entered(body: Node) -> void:
 
 func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("player_bullet"):
-		take_damage(1)
+		# Obtener el daño de la bala (ahora mejorado por upgrades)
+		var bullet_damage := 1
+		if area.has_method("get_damage"):
+			bullet_damage = area.get_damage()
+		elif area.has_meta("damage"):
+			bullet_damage = area.get_meta("damage")
+		
+		take_damage(bullet_damage)
 		area.queue_free()

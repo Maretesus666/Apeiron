@@ -31,30 +31,34 @@ func _ready():
 func _actualizar_stats_nave() -> void:
 	var lbl = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/InfoLabel
 	
-	var vel_base := 5000
+	# Velocidad
+	var vel_base := 6000
 	var vel_bonus := int(UpgradeManager.get_ship_stat("max_speed"))
 	var vel_total := vel_base + vel_bonus
 	
+	# Vida
 	var vida_base := 5
 	var vida_bonus := int(UpgradeManager.get_ship_stat("max_health"))
 	var vida_total := vida_base + vida_bonus
 	
+	# Cadencia de disparo
 	var cadencia_base := 0.2
 	var cadencia_bonus := UpgradeManager.get_ship_stat("fire_rate")
 	var cadencia_total := maxf(0.05, cadencia_base - cadencia_bonus)
 	
+	# Daño
 	var dano_base := 1
 	var dano_bonus := int(UpgradeManager.get_ship_stat("bullet_damage"))
 	var dano_total := dano_base + dano_bonus
 	
-	lbl.text = "🚀 NAVE\n"
-	lbl.text += "━━━━━━━━━━━━━━━━━\n"
+	lbl.text = "NAVE\n"
+	lbl.text += "===================\n"
 	lbl.text += "Velocidad: %d (+%d)\n" % [vel_total, vel_bonus]
 	lbl.text += "Vida: %d (+%d)\n" % [vida_total, vida_bonus]
-	lbl.text += "Daño: %d (+%d)\n" % [dano_total, dano_bonus]
+	lbl.text += "Dano: %d (+%d)\n" % [dano_total, dano_bonus]
 	lbl.text += "Cadencia: %.2fs\n" % cadencia_total
-	lbl.text += "━━━━━━━━━━━━━━━━━\n"
-	lbl.text += "💰 Puntos: %d" % UpgradeManager.clicker_points
+	lbl.text += "===================\n"
+	lbl.text += "Puntos: %d" % UpgradeManager.clicker_points
 
 func _actualizar_stats_nucleo() -> void:
 	# Esto podría mostrar stats del clicker en algún lugar si quieres
