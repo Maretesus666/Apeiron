@@ -136,3 +136,4 @@ expand_icon = true
 
 [connection signal="pressed" from="contenedor/jugar" to="." method="_on_jugar_pressed"]
 [connection signal="pressed" from="contenedor/opciones" to="." method="_on_opciones_pressed"]
+[connection signal="pressed" from="contenedor/salir" to="." method="_on_salir_pressed"]

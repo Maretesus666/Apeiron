@@ -8,25 +8,47 @@ var game_points: int = 0
 
 # Mejoras de la nave (compradas con puntos del clicker)
 var ship_upgrades = {
-	"max_speed": {"level": 0, "cost": 50, "value": 100},
-	"acceleration": {"level": 0, "cost": 30, "value": 50},
-	"max_health": {"level": 0, "cost": 100, "value": 1},
-	"fire_rate": {"level": 0, "cost": 75, "value": 0.1}
+	"max_speed": {"level": 0, "cost": 50, "value": 100, "desc": "Velocidad máxima"},
+	"acceleration": {"level": 0, "cost": 30, "value": 50, "desc": "Aceleración"},
+	"max_health": {"level": 0, "cost": 100, "value": 1, "desc": "Vida máxima"},
+	"fire_rate": {"level": 0, "cost": 75, "value": 0.02, "desc": "Cadencia de disparo"},
+	"bullet_speed": {"level": 0, "cost": 40, "value": 150, "desc": "Velocidad de balas"},
+	"bullet_damage": {"level": 0, "cost": 60, "value": 1, "desc": "Daño de balas"},
+	"thrust_power": {"level": 0, "cost": 45, "value": 200, "desc": "Potencia de empuje"},
+	"lateral_agility": {"level": 0, "cost": 35, "value": 100, "desc": "Agilidad lateral"},
+	"rotation_speed": {"level": 0, "cost": 25, "value": 1, "desc": "Velocidad de rotación"}
 }
 
 # Mejoras del clicker (compradas con puntos del juego)
 var clicker_upgrades = {
-	"points_per_click": {"level": 0, "cost": 10, "value": 1},
-	"auto_clicker_speed": {"level": 0, "cost": 25, "value": 1},
-	"starting_bonus": {"level": 0, "cost": 50, "value": 10}
+	"points_per_click": {"level": 0, "cost": 10, "value": 1, "desc": "Puntos por click"},
+	"auto_clicker_speed": {"level": 0, "cost": 25, "value": 0.5, "desc": "Velocidad auto-click"},
+	"click_multiplier": {"level": 0, "cost": 50, "value": 0.1, "desc": "Multiplicador de clicks"},
+	"passive_income": {"level": 0, "cost": 75, "value": 2, "desc": "Generación pasiva/seg"},
+	"critical_chance": {"level": 0, "cost": 100, "value": 5, "desc": "Probabilidad crítico %"},
+	"critical_multiplier": {"level": 0, "cost": 150, "value": 0.5, "desc": "Multiplicador crítico"},
+	"combo_bonus": {"level": 0, "cost": 60, "value": 0.05, "desc": "Bonificación por combo"},
+	"bulk_clicks": {"level": 0, "cost": 200, "value": 1, "desc": "Clicks múltiples"}
 }
 
 signal clicker_points_changed(new_points)
 signal game_points_changed(new_points)
 signal upgrade_purchased(upgrade_type, upgrade_id)
 
+# Timer para passive income
+var passive_timer: float = 0.0
+
 func _ready():
 	load_data()
+
+func _process(delta: float) -> void:
+	# Passive income del clicker
+	var passive := get_clicker_stat("passive_income")
+	if passive > 0:
+		passive_timer += delta
+		if passive_timer >= 1.0:
+			passive_timer = 0.0
+			add_clicker_points(int(passive))
 
 # Agregar puntos
 func add_clicker_points(amount: int):
@@ -73,18 +95,18 @@ func buy_clicker_upgrade(upgrade_id: String) -> bool:
 		return true
 	return false
 
-# Obtener costos
+# Obtener costos (escalan exponencialmente)
 func get_ship_upgrade_cost(upgrade_id: String) -> int:
 	if not upgrade_id in ship_upgrades:
 		return 0
 	var upgrade = ship_upgrades[upgrade_id]
-	return upgrade["cost"] * (upgrade["level"] + 1)
+	return int(upgrade["cost"] * pow(1.15, upgrade["level"]))
 
 func get_clicker_upgrade_cost(upgrade_id: String) -> int:
 	if not upgrade_id in clicker_upgrades:
 		return 0
 	var upgrade = clicker_upgrades[upgrade_id]
-	return upgrade["cost"] * (upgrade["level"] + 1)
+	return int(upgrade["cost"] * pow(1.15, upgrade["level"]))
 
 # Obtener valores de mejoras
 func get_ship_stat(stat_id: String) -> float:

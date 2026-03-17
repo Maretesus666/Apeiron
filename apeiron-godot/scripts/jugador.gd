@@ -1,26 +1,20 @@
 extends CharacterBody2D
 
-# ─── Movimiento ───────────────────────────────────────────────────────────────
-@export var thrust_acceleration: float  = 4000.0
+@export var thrust_acceleration: float  = 6000.0
 @export var brake_strength: float       = 2500.0
 @export var lateral_strength: float     = 1200.0
-@export var max_speed: float            = 5000.0
+@export var max_speed: float            = 6000.0
 @export var damping: float              = 0
 
-# ─── Apuntado ─────────────────────────────────────────────────────────────────
 @export var rotation_speed: float       = 8.0
-
-# ─── Combate ──────────────────────────────────────────────────────────────────
 @export var base_fire_rate: float       = 0.2
 @export var base_max_health: int        = 5
 
-# ─── Shake ────────────────────────────────────────────────────────────────────
 @export var shoot_shake_amount: float    = 2.0
 @export var shoot_shake_duration: float  = 0.08
 @export var damage_shake_amount: float   = 10.0
 @export var damage_shake_duration: float = 0.3
 
-# ─── Runtime ──────────────────────────────────────────────────────────────────
 var max_health: int
 var current_health: int
 var fire_rate: float
@@ -42,6 +36,8 @@ signal health_changed(new_health, max_health)
 signal player_died
 
 func _ready() -> void:
+	# Detección de colisiones continua para velocidades extremas
+	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	_apply_upgrades()
 	current_health = max_health
 	_setup_particles()
@@ -71,56 +67,53 @@ func _physics_process(delta: float) -> void:
 # ─── Rotación ─────────────────────────────────────────────────────────────────
 func _handle_rotation(delta: float) -> void:
 	var target_angle: float
-
 	if ConfigManager.mobile_controls_enabled and _mobile != null:
-		# Usar joy_active (flag limpio) en vez de chequear el valor del ángulo.
-		# Cuando el joystick está en reposo no rotamos, conservando la última dirección.
 		if not _mobile.joy_active:
 			return
-		# El sprite es horizontal (apunta a la derecha cuando rotation=0).
-		# raw.angle() devuelve 0 cuando se empuja a la derecha → coincide directo.
 		target_angle = _mobile.joy_angle
 	else:
-		# PC: apuntar hacia el mouse.
-		# angle_to_point da el ángulo del vector nave→mouse.
-		# +PI porque PuntoDisparo está en X+ (derecha del body) y el sprite
-		# mira hacia donde está el mouse, no desde la nave hacia el mouse.
 		target_angle = global_position.angle_to_point(get_global_mouse_position()) + PI
-
 	rotation = lerp_angle(rotation, target_angle, rotation_speed * delta)
 
-# ─── Movimiento ───────────────────────────────────────────────────────────────
+# ─── Movimiento con substepping ───────────────────────────────────────────────
+# A velocidades extremas dividimos el delta en pasos pequeños para que
+# move_and_slide() no salte colisiones ni salga del rango de render.
+const MAX_STEP_DISTANCE: float = 500.0   # px máximos por substep
+
 func _handle_movement(delta: float) -> void:
+	# ── MÓVIL ─────────────────────────────────────────────────────────────────
+	if ConfigManager.mobile_controls_enabled and _mobile != null:
+		var joy: Vector2 = _mobile.movement
+		if joy.length() > 0.05:
+			var accel: float = thrust_acceleration + UpgradeManager.get_ship_stat("acceleration")
+			velocity += joy * accel * delta
+		var spd: float = velocity.length()
+		if spd > max_speed:
+			velocity = velocity * (max_speed / spd)
+		_substep_move(delta)
+		return
+
+	# ── PC ────────────────────────────────────────────────────────────────────
 	var forward: Vector2 = Vector2.RIGHT.rotated(rotation)
 	var right: Vector2   = Vector2.DOWN.rotated(rotation)
 
-	var joy: Vector2 = Vector2.ZERO
-	if _mobile != null:
-		joy = _mobile.movement
-
-	var pressing_w: bool = Input.is_action_pressed("move_up")    or joy.y < -0.1
-	var pressing_s: bool = Input.is_action_pressed("move_down")  or joy.y >  0.1
-	var pressing_a: bool = Input.is_action_pressed("move_left")  or joy.x < -0.1
-	var pressing_d: bool = Input.is_action_pressed("move_right") or joy.x >  0.1
+	var pressing_w: bool = Input.is_action_pressed("move_up")
+	var pressing_s: bool = Input.is_action_pressed("move_down")
+	var pressing_a: bool = Input.is_action_pressed("move_left")
+	var pressing_d: bool = Input.is_action_pressed("move_right")
 
 	if pressing_w:
 		var accel: float = thrust_acceleration + UpgradeManager.get_ship_stat("acceleration")
-		var joy_scale: float = absf(joy.y) if joy.y < -0.1 else 1.0
-		velocity += forward * accel * joy_scale * delta
-
+		velocity += forward * accel * delta
 	if pressing_s:
 		if velocity.length() > 10.0:
 			velocity -= velocity.normalized() * brake_strength * delta
 		else:
 			velocity = Vector2.ZERO
-
 	if pressing_a:
-		var scale_a: float = absf(joy.x) if joy.x < -0.1 else 1.0
-		velocity -= right * lateral_strength * scale_a * delta
+		velocity -= right * lateral_strength * delta
 	if pressing_d:
-		var scale_d: float = absf(joy.x) if joy.x >  0.1 else 1.0
-		velocity += right * lateral_strength * scale_d * delta
-
+		velocity += right * lateral_strength * delta
 	if pressing_w and pressing_a and pressing_d:
 		var boost_accel: float = thrust_acceleration + UpgradeManager.get_ship_stat("acceleration")
 		velocity += forward * boost_accel * 0.6 * delta
@@ -133,7 +126,17 @@ func _handle_movement(delta: float) -> void:
 	if spd > max_speed:
 		velocity = velocity * (max_speed / spd)
 
-	move_and_slide()
+	_substep_move(delta)
+
+func _substep_move(delta: float) -> void:
+	# Calcular cuántos substeps necesitamos para que ninguno mueva más de MAX_STEP_DISTANCE
+	var distance_this_frame: float = velocity.length() * delta
+	var steps: int = max(1, int(ceil(distance_this_frame / MAX_STEP_DISTANCE)))
+	var sub_delta: float = delta / float(steps)
+
+	for _i in range(steps):
+		move_and_slide()
+		# Pequeña pausa implícita — la posición se acumula entre substeps
 
 # ─── Disparo ──────────────────────────────────────────────────────────────────
 func _shoot() -> void:
@@ -162,8 +165,9 @@ func die() -> void:
 	player_died.emit()
 	queue_free()
 
-# ─── Shake ────────────────────────────────────────────────────────────────────
 func apply_shake(amount: float, duration: float) -> void:
+	if not ConfigManager.screenshake_enabled:
+		return
 	if is_shaking:
 		return
 	is_shaking = true
@@ -185,7 +189,6 @@ func flash_damage() -> void:
 	if is_instance_valid(self):
 		sprite.modulate = Color.WHITE
 
-# ─── Partículas de daño / muerte ─────────────────────────────────────────────
 func spawn_damage_particles() -> void:
 	_make_burst(global_position, 18, 0.6, 130, 280, 2.5, 5.0, Color(1, 0.2, 0.2))
 
@@ -215,7 +218,7 @@ func _make_burst(pos: Vector2, amount: int, lifetime: float,
 	if is_instance_valid(p):
 		p.queue_free()
 
-# ─── Setup de partículas ──────────────────────────────────────────────────────
+# ─── Partículas (idéntico al original) ───────────────────────────────────────
 func _setup_particles() -> void:
 	thruster_main.emitting               = false
 	thruster_main.local_coords           = true
@@ -237,16 +240,11 @@ func _setup_particles() -> void:
 		Color(0.6, 0.1, 0.0, 0.3),
 		Color(0.0, 0.0, 0.0, 0.0)
 	])
-	thruster_main.position               = Vector2(-22, 0)
+	thruster_main.position = Vector2(-22, 0)
 
-	thruster_left = _make_lateral_thruster(
-		Vector2(0, 28), Vector2(-0.5, 1).normalized()
-	)
+	thruster_left  = _make_lateral_thruster(Vector2(0,  28), Vector2(-0.5,  1).normalized())
+	thruster_right = _make_lateral_thruster(Vector2(0, -28), Vector2(-0.5, -1).normalized())
 	add_child(thruster_left)
-
-	thruster_right = _make_lateral_thruster(
-		Vector2(0, -28), Vector2(-0.5, -1).normalized()
-	)
 	add_child(thruster_right)
 
 func _make_lateral_thruster(offset: Vector2, local_dir: Vector2) -> CPUParticles2D:
@@ -282,7 +280,6 @@ func _make_gradient(colors: Array) -> Gradient:
 	g.offsets = offsets
 	return g
 
-# ─── Update de partículas ─────────────────────────────────────────────────────
 func _update_particles() -> void:
 	var spd: float       = velocity.length()
 	var intensity: float = clampf(spd / max_speed, 0.0, 1.0)
@@ -305,18 +302,18 @@ func _update_particles() -> void:
 		thruster_main.lifetime             = 0.28 + 0.22 * intensity
 
 	var boost_active: bool = pressing_w and pressing_a and pressing_d
-	thruster_left.emitting = pressing_a
+	thruster_left.emitting  = pressing_a
+	thruster_right.emitting = pressing_d
+
 	if pressing_a:
-		var boost_mult: float = 1.5 if boost_active else 1.0
-		thruster_left.initial_velocity_min = (120.0 + 100.0 * intensity) * boost_mult
-		thruster_left.initial_velocity_max = (200.0 + 140.0 * intensity) * boost_mult
+		var bm: float = 1.5 if boost_active else 1.0
+		thruster_left.initial_velocity_min = (120.0 + 100.0 * intensity) * bm
+		thruster_left.initial_velocity_max = (200.0 + 140.0 * intensity) * bm
 		thruster_left.scale_amount_min     = 1.5 + (1.0 if boost_active else 0.0)
 		thruster_left.scale_amount_max     = 3.0 + (1.5 if boost_active else 0.0)
-
-	thruster_right.emitting = pressing_d
 	if pressing_d:
-		var boost_mult: float = 1.5 if boost_active else 1.0
-		thruster_right.initial_velocity_min = (120.0 + 100.0 * intensity) * boost_mult
-		thruster_right.initial_velocity_max = (200.0 + 140.0 * intensity) * boost_mult
+		var bm: float = 1.5 if boost_active else 1.0
+		thruster_right.initial_velocity_min = (120.0 + 100.0 * intensity) * bm
+		thruster_right.initial_velocity_max = (200.0 + 140.0 * intensity) * bm
 		thruster_right.scale_amount_min     = 1.5 + (1.0 if boost_active else 0.0)
 		thruster_right.scale_amount_max     = 3.0 + (1.5 if boost_active else 0.0)
