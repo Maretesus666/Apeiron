@@ -10,18 +10,6 @@ radius = 270.1851
 
 [node name="jugador" type="CharacterBody2D" groups=["player", "player_bullet"]]
 script = ExtResource("1_st4uy")
-thrust_acceleration = null
-brake_strength = null
-lateral_strength = null
-max_speed = null
-damping = null
-rotation_speed = null
-base_fire_rate = null
-base_max_health = null
-shoot_shake_amount = null
-shoot_shake_duration = null
-damage_shake_amount = null
-damage_shake_duration = null
 
 [node name="Bala" parent="." instance=ExtResource("3_r2ihm")]
 scale = Vector2(0.1, 0.1)

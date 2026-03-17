@@ -18,10 +18,12 @@ func _ready() -> void:
 	_refresh_button()
 
 func _build() -> void:
-	# Fondo oscuro semitransparente que cubre toda la pantalla
+	# Fondo oscuro semitransparente que cubre toda la pantalla.
+	# MOUSE_FILTER_PASS: deja pasar los clicks a los hijos (panel y botones).
 	var overlay := ColorRect.new()
 	overlay.color            = Color(0, 0, 0, 0.72)
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter     = Control.MOUSE_FILTER_PASS  # ← FIX: no absorbe clicks
 	add_child(overlay)
 
 	# Panel centrado
@@ -92,7 +94,7 @@ func _build() -> void:
 
 	# Botón cerrar
 	var close_btn := Button.new()
-	close_btn.text = "VOLVER" 
+	close_btn.text = "VOLVER"
 	close_btn.add_theme_font_override("font", FONT)
 	close_btn.add_theme_font_size_override("font_size", FONT_SIZE_OPT)
 	close_btn.pressed.connect(_on_close)
