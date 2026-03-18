@@ -106,14 +106,16 @@ func _on_nucleo_clicked() -> void:
 	var bulk := int(UpgradeManager.get_clicker_stat("bulk_clicks"))
 	var times := 1 + bulk
 	
+	# Dispersar los números con offset y pequeño delay
 	for i in times:
-		_add_points(true)
-		if i > 0:
-			await get_tree().create_timer(0.05).timeout
+		_add_points(true, i)  # Pasar el índice para dispersión
+		if i > 0 and i < times - 1:
+			# Pequeño delay entre clicks para que no salgan todos a la vez
+			await get_tree().create_timer(0.04).timeout
 	
 	_animate_click()
 
-func _add_points(show_fx: bool) -> void:
+func _add_points(show_fx: bool, offset_index: int = 0) -> void:
 	var base_value := base_points_per_click + int(UpgradeManager.get_clicker_stat("points_per_click"))
 	
 	# Multiplicador
@@ -137,7 +139,7 @@ func _add_points(show_fx: bool) -> void:
 	UpgradeManager.add_clicker_points(final_value)
 	
 	if show_fx:
-		_spawn_float_label(final_value, is_critical)
+		_spawn_float_label(final_value, offset_index)
 
 func _animate_click() -> void:
 	if not nucleo_sprite:
@@ -147,44 +149,73 @@ func _animate_click() -> void:
 	tween.tween_property(nucleo_sprite, "scale", Vector2.ONE * click_scale_amount, 0.07)
 	tween.tween_property(nucleo_sprite, "scale", Vector2.ONE, 0.12)
 
-func _spawn_float_label(value: int, is_critical: bool) -> void:
+func _spawn_float_label(value: int, offset_index: int = 0) -> void:
 	if not nucleo_sprite:
 		return
 		
 	var lbl := Label.new()
-	var text := "+%d" % value
-	if is_critical:
-		text += " ¡CRÍTICO!"
-	
-	lbl.text = text
+	lbl.text = "+%d" % value
 	lbl.add_theme_font_override("font", load("res://assets/fonts/ultrakill.ttf"))
-	lbl.add_theme_font_size_override("font_size", 48 if is_critical else 40)
+	lbl.add_theme_font_size_override("font_size", 42)  # Tamaño uniforme para todos
 	
-	var color := Color(1, 0.3, 0.1) if is_critical else Color(1, 0.9, 0.2)
+	# Color RGB cíclico basado en el valor
+	var color := _get_value_color(value)
 	lbl.add_theme_color_override("font_color", color)
 	
 	# Outline para mejor visibilidad
 	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
 	lbl.add_theme_constant_override("outline_size", 4)
 	
+	# Posición MUY cercana al núcleo (rango ultra restrictivo)
+	# Dispersión extra para clicks múltiples usando offset_index
+	var dispersion_x := 12.0 + (offset_index * 3.0)  # Más dispersión con cada click
+	var dispersion_y := 8.0 + (offset_index * 2.0)
+	
 	var center_pos := nucleo_sprite.global_position + nucleo_sprite.size / 2.0
-	center_pos += Vector2(randf_range(-60, 60), randf_range(-40, 0))
+	center_pos += Vector2(
+		randf_range(-dispersion_x, dispersion_x),
+		randf_range(-dispersion_y, dispersion_y)
+	)
 	lbl.global_position = center_pos
 	
 	get_tree().root.add_child(lbl)
 	
-	var distance := 120 if is_critical else 90
-	var duration := 1.0 if is_critical else 0.7
+	# Animación uniforme para todos
+	var distance := 80.0
+	var duration := 0.8
 	
 	var tw := lbl.create_tween().set_parallel(true)
 	tw.tween_property(lbl, "position:y", lbl.position.y - distance, duration)
 	tw.tween_property(lbl, "modulate:a", 0.0, duration)
 	
-	# Escalado para críticos
-	if is_critical:
-		tw.tween_property(lbl, "scale", Vector2.ONE * 1.3, 0.2)
-	
 	tw.chain().tween_callback(lbl.queue_free)
+
+# Genera un color RGB cíclico basado en el valor
+# Cambio rápido al inicio (1-100), cambio lento después (100-10000)
+func _get_value_color(value: int) -> Color:
+	# Ciclo del 1 al 10000, luego se reinicia
+	var position_in_cycle := fmod(float(value - 1), 10000.0) + 1.0
+	
+	# Usar raíz cuadrada para que los valores bajos cambien rápido
+	# y los valores altos cambien lento
+	# sqrt(1) = 1, sqrt(100) = 10, sqrt(10000) = 100
+	var sqrt_value := sqrt(position_in_cycle)
+	var sqrt_max := sqrt(10000.0)  # = 100
+	
+	# Normalizar de 0 a 1 usando la raíz cuadrada
+	var hue := sqrt_value / sqrt_max
+	
+	# El hue va de 0 a 1 (un ciclo completo de colores)
+	# Valores bajos (1-100): cambian del 0.1 al 0.32 = cambio rápido visible
+	# Valores medios (100-2500): cambian del 0.32 al 0.5 = cambio moderado
+	# Valores altos (2500-10000): cambian del 0.5 al 1.0 = cambio lento
+	
+	# Saturación y brillo al máximo para colores vibrantes
+	var saturation := 1.0
+	var value_brightness := 1.0
+	
+	# Convertir HSV a RGB
+	return Color.from_hsv(hue, saturation, value_brightness)
 
 func _on_points_changed(new_points: int) -> void:
 	if points_label:
