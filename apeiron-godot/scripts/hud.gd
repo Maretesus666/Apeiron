@@ -14,14 +14,15 @@ var speed_label:     Label
 var speed_value:     Label
 var boost_label:     Label
 
-var fps_label: Label = null   # ← nuevo
+var fps_label: Label = null
 
 var player: CharacterBody2D = null
 var _display_speed: float   = 0.0
 var _boost_timer:   float   = 0.0
 
-const HEART_FULL  := "♥"
-const HEART_EMPTY := "♡"
+# Iconos sci-fi para la vida (células de energía hexagonales)
+const CELL_FULL  := "▰"  # Célula de energía llena
+const CELL_EMPTY := "▱"  # Célula de energía vacía
 
 func _ready() -> void:
 	_setup_existing_labels()
@@ -31,7 +32,7 @@ func _ready() -> void:
 	player = get_tree().get_first_node_in_group("player")
 	if player:
 		player.health_changed.connect(_on_player_health_changed)
-		player.player_died.connect(_on_player_died)
+#		player.player_died.connect(_on_player_died)
 		_on_player_health_changed(player.current_health, player.max_health)
 
 	if ScoreManager:
@@ -40,13 +41,12 @@ func _ready() -> void:
 		_on_score_changed(ScoreManager.score)
 		_on_combo_changed(ScoreManager.combo)
 
-	# Escuchar cambios de configuración en tiempo real
 	ConfigManager.connect("mobile_controls_changed", func(_v): _build_fps_label())
 
 func _setup_existing_labels() -> void:
-	$HealthContainer.position = Vector2(10, 10)
-	$ScoreContainer.position  = Vector2(10, 30)
-
+	$HealthContainer.position = Vector2(10, 30)
+	$ScoreContainer.position  = Vector2(10, 54)
+	
 	for lbl in [health_label, score_label, combo_label]:
 		if lbl:
 			lbl.add_theme_font_override("font", FONT)
@@ -55,10 +55,10 @@ func _setup_existing_labels() -> void:
 	if combo_label:
 		combo_label.visible = false
 	if hearts_container:
-		hearts_container.position.y += 50
+		$HealthContainer.add_theme_constant_override("separation", -64)
 	var sc := score_label.get_parent() if score_label else null
 	if sc:
-		sc.add_theme_constant_override("separation", 40)
+		sc.add_theme_constant_override("separation", 20)
 
 func _build_speed_hud() -> void:
 	var vp := get_viewport().get_visible_rect().size
@@ -98,7 +98,7 @@ func _build_speed_hud() -> void:
 	speed_container.add_child(speed_bar_fill)
 
 	boost_label = Label.new()
-	boost_label.text    = "▶ BOOST"
+	boost_label.text    = ">> BOOST"
 	boost_label.position = Vector2(0, 50)
 	boost_label.add_theme_font_override("font", FONT)
 	boost_label.add_theme_font_size_override("font_size", 22)
@@ -106,9 +106,7 @@ func _build_speed_hud() -> void:
 	boost_label.visible = false
 	speed_container.add_child(boost_label)
 
-# ─── FPS label — arriba a la izquierda, visible según config ─────────────────
 func _build_fps_label() -> void:
-	# Si ya existe lo destruimos para recrear con el estado actual
 	if is_instance_valid(fps_label):
 		fps_label.queue_free()
 		fps_label = null
@@ -121,7 +119,6 @@ func _build_fps_label() -> void:
 	fps_label.add_theme_font_override("font", FONT)
 	fps_label.add_theme_font_size_override("font_size", 22)
 	fps_label.add_theme_color_override("font_color", Color(1, 1, 0, 0.9))
-	# Posición: arriba izquierda, debajo del health container
 	fps_label.position = Vector2(10, 90)
 	add_child(fps_label)
 
@@ -129,7 +126,6 @@ func _process(delta: float) -> void:
 	if not player or not is_instance_valid(player):
 		return
 	_update_speed_hud(delta)
-	# Actualizar FPS cada frame
 	if is_instance_valid(fps_label):
 		fps_label.text = "FPS: %d" % Engine.get_frames_per_second()
 
@@ -175,22 +171,33 @@ func _speed_color(t: float) -> Color:
 
 func _on_player_health_changed(current_health: int, max_health: int) -> void:
 	health_label.text = "VIDA  %d / %d" % [current_health, max_health]
-	_update_hearts(current_health, max_health)
+	_update_energy_cells(current_health, max_health)
 
-func _update_hearts(current: int, maximum: int) -> void:
+func _update_energy_cells(current: int, maximum: int) -> void:
 	hearts_container.add_theme_constant_override("separation", 8)
 	for child in hearts_container.get_children():
 		child.queue_free()
+	
 	for i in maximum:
 		var lbl := Label.new()
 		lbl.add_theme_font_override("font", FONT)
 		lbl.add_theme_font_size_override("font_size", 30)
+		
 		if i < current:
-			lbl.text = HEART_FULL
-			lbl.add_theme_color_override("font_color", Color(1.0, 0.15, 0.15))
+			# Célula de energía activa
+			lbl.text = CELL_FULL
+			# Color cian brillante para sci-fi
+			lbl.add_theme_color_override("font_color", Color(0.2, 0.9, 1.0))
+			# Efecto de brillo con outline
+			lbl.add_theme_color_override("font_outline_color", Color(0.1, 0.5, 0.8, 0.6))
+			lbl.add_theme_constant_override("outline_size", 3)
 		else:
-			lbl.text = HEART_EMPTY
-			lbl.add_theme_color_override("font_color", Color(0.35, 0.35, 0.35))
+			# Célula de energía apagada
+			lbl.text = CELL_EMPTY
+			lbl.add_theme_color_override("font_color", Color(0.25, 0.25, 0.3))
+			lbl.add_theme_color_override("font_outline_color", Color(0.1, 0.1, 0.15, 0.4))
+			lbl.add_theme_constant_override("outline_size", 2)
+		
 		hearts_container.add_child(lbl)
 
 func _on_score_changed(new_score: int) -> void:
@@ -208,14 +215,14 @@ func _on_combo_changed(new_combo: int) -> void:
 	else:
 		combo_label.visible = false
 
-func _on_player_died() -> void:
-	var lbl := Label.new()
-	lbl.text = "GAME OVER"
-	lbl.add_theme_font_override("font", FONT)
-	lbl.add_theme_font_size_override("font_size", 72)
-	lbl.add_theme_color_override("font_color", Color(1.0, 0.05, 0.05))
-	lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
-	lbl.add_theme_constant_override("outline_size", 6)
-	lbl.set_anchors_preset(Control.PRESET_CENTER)
-	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(lbl)
+#func _on_player_died() -> void:
+#	var lbl := Label.new()
+#	lbl.text = "GAME OVER"
+#	lbl.add_theme_font_override("font", FONT)
+#	lbl.add_theme_font_size_override("font_size", 72)
+#	lbl.add_theme_color_override("font_color", Color(1.0, 0.05, 0.05))
+#	lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+#	lbl.add_theme_constant_override("outline_size", 6)
+#	lbl.set_anchors_preset(Control.PRESET_CENTER)
+#	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+#	add_child(lbl)

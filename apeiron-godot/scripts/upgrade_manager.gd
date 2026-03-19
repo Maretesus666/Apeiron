@@ -8,27 +8,27 @@ var game_points: int = 0
 
 # Mejoras de la nave (compradas con puntos del clicker)
 var ship_upgrades = {
-	"max_speed": {"level": 0, "cost": 50, "value": 100, "desc": "Velocidad máxima"},
-	"acceleration": {"level": 0, "cost": 30, "value": 50, "desc": "Aceleración"},
-	"max_health": {"level": 0, "cost": 100, "value": 1, "desc": "Vida máxima"},
-	"fire_rate": {"level": 0, "cost": 75, "value": 0.02, "desc": "Cadencia de disparo"},
-	"bullet_speed": {"level": 0, "cost": 40, "value": 150, "desc": "Velocidad de balas"},
-	"bullet_damage": {"level": 0, "cost": 60, "value": 1, "desc": "Daño de balas"},
-	"thrust_power": {"level": 0, "cost": 45, "value": 200, "desc": "Potencia de empuje"},
-	"lateral_agility": {"level": 0, "cost": 35, "value": 100, "desc": "Agilidad lateral"},
-	"rotation_speed": {"level": 0, "cost": 25, "value": 1, "desc": "Velocidad de rotación"}
+	"max_speed": {"level": 0, "cost": 50, "value": 100, "desc": "Velocidad máxima", "max_level": 999},
+	"acceleration": {"level": 0, "cost": 30, "value": 50, "desc": "Aceleración", "max_level": 999},
+	"max_health": {"level": 0, "cost": 100, "value": 1, "desc": "Vida máxima", "max_level": 22},
+	"fire_rate": {"level": 0, "cost": 75, "value": 0.02, "desc": "Cadencia de disparo", "max_level": 999},
+	"bullet_speed": {"level": 0, "cost": 40, "value": 150, "desc": "Velocidad de balas", "max_level": 999},
+	"bullet_damage": {"level": 0, "cost": 60, "value": 1, "desc": "Daño de balas", "max_level": 999},
+	"thrust_power": {"level": 0, "cost": 45, "value": 200, "desc": "Potencia de empuje", "max_level": 999},
+	"lateral_agility": {"level": 0, "cost": 35, "value": 100, "desc": "Agilidad lateral", "max_level": 999},
+	"rotation_speed": {"level": 0, "cost": 25, "value": 1, "desc": "Velocidad de rotación", "max_level": 999}
 }
 
 # Mejoras del clicker (compradas con puntos del juego)
 var clicker_upgrades = {
-	"points_per_click": {"level": 0, "cost": 10, "value": 1, "desc": "Puntos por click"},
-	"auto_clicker_speed": {"level": 0, "cost": 25, "value": 0.5, "desc": "Velocidad auto-click"},
-	"click_multiplier": {"level": 0, "cost": 50, "value": 0.1, "desc": "Multiplicador de clicks"},
-	"passive_income": {"level": 0, "cost": 75, "value": 2, "desc": "Generación pasiva/seg"},
-	"critical_chance": {"level": 0, "cost": 100, "value": 5, "desc": "Probabilidad crítico %"},
-	"critical_multiplier": {"level": 0, "cost": 150, "value": 0.5, "desc": "Multiplicador crítico"},
-	"combo_bonus": {"level": 0, "cost": 60, "value": 0.05, "desc": "Bonificación por combo"},
-	"bulk_clicks": {"level": 0, "cost": 200, "value": 1, "desc": "Clicks múltiples"}
+	"points_per_click": {"level": 0, "cost": 10, "value": 1, "desc": "Puntos por click", "max_level": 999},
+	"auto_clicker_speed": {"level": 0, "cost": 25, "value": 0.5, "desc": "Velocidad auto-click", "max_level": 999},
+	"click_multiplier": {"level": 0, "cost": 50, "value": 0.1, "desc": "Multiplicador de clicks", "max_level": 999},
+	"passive_income": {"level": 0, "cost": 75, "value": 2, "desc": "Generación pasiva/seg", "max_level": 999},
+	"critical_chance": {"level": 0, "cost": 100, "value": 5, "desc": "Probabilidad crítico %", "max_level": 999},
+	"critical_multiplier": {"level": 0, "cost": 150, "value": 0.5, "desc": "Multiplicador crítico", "max_level": 999},
+	"combo_bonus": {"level": 0, "cost": 60, "value": 0.05, "desc": "Bonificación por combo", "max_level": 999},
+	"bulk_clicks": {"level": 0, "cost": 200, "value": 1, "desc": "Clicks múltiples", "max_level": 3}
 }
 
 signal clicker_points_changed(new_points)
@@ -67,6 +67,12 @@ func buy_ship_upgrade(upgrade_id: String) -> bool:
 		return false
 	
 	var upgrade = ship_upgrades[upgrade_id]
+	var max_level = upgrade.get("max_level", 999)
+	
+	# Verificar si ya alcanzó el nivel máximo
+	if upgrade["level"] >= max_level:
+		return false
+	
 	var cost = get_ship_upgrade_cost(upgrade_id)
 	
 	if clicker_points >= cost:
@@ -84,6 +90,12 @@ func buy_clicker_upgrade(upgrade_id: String) -> bool:
 		return false
 	
 	var upgrade = clicker_upgrades[upgrade_id]
+	var max_level = upgrade.get("max_level", 999)
+	
+	# Verificar si ya alcanzó el nivel máximo
+	if upgrade["level"] >= max_level:
+		return false
+	
 	var cost = get_clicker_upgrade_cost(upgrade_id)
 	
 	if game_points >= cost:
@@ -161,7 +173,10 @@ func _migrate_upgrades(default_dict: Dictionary, loaded_dict: Dictionary) -> voi
 	for key in default_dict.keys():
 		if key in loaded_dict:
 			# Mantener nivel guardado pero actualizar otros valores
-			default_dict[key]["level"] = loaded_dict[key].get("level", 0)
+			var loaded_level = loaded_dict[key].get("level", 0)
+			var max_level = default_dict[key].get("max_level", 999)
+			# Asegurarse de que el nivel cargado no exceda el máximo
+			default_dict[key]["level"] = min(loaded_level, max_level)
 		# Si no existe en loaded_dict, se queda con valores por defecto (level = 0)
 
 func reset_all_data():
