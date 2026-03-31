@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://dn7ruopjurr62"]
+[gd_scene load_steps=14 format=3 uid="uid://dn7ruopjurr62"]
 
 [ext_resource type="Shader" uid="uid://cvu8ucill03dy" path="res://shaders/menu.gdshader" id="1_5evyv"]
 [ext_resource type="Script" uid="uid://nn6rx2sec51g" path="res://scripts/background_generator.gd" id="1_p57ef"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://nnpxtjjuei6h" path="res://scripts/minimap.gd" id="7_0tnpc"]
 [ext_resource type="FontFile" uid="uid://bjkvctpyibltk" path="res://assets/fonts/ultrakill.ttf" id="7_u5sy4"]
 [ext_resource type="Script" uid="uid://bo5eagd8cxhd6" path="res://scripts/enemy_indicators.gd" id="8_vtaks"]
+[ext_resource type="Script" uid="uid://yq5xbbiy320e" path="res://scripts/objective_indicator.gd" id="9_kvpfn"]
 [ext_resource type="Script" uid="uid://d08m6io46qskt" path="res://scripts/mobile_controls.gd" id="10_vtaks"]
 
 [sub_resource type="GDScript" id="GDScript_lbhrr"]
@@ -112,8 +113,19 @@ offset_bottom = 40.0
 script = ExtResource("7_0tnpc")
 
 [node name="EnemyIndicators" type="CanvasLayer" parent="HUD"]
-visible = false
 script = ExtResource("8_vtaks")
+
+[node name="ObjectiveIndicator" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+script = ExtResource("9_kvpfn")
 
 [node name="PauseMenu" type="CanvasLayer" parent="."]
 process_mode = 3

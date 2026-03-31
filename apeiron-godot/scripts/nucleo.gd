@@ -106,7 +106,7 @@ func _on_nucleo_clicked() -> void:
 	var bulk := int(UpgradeManager.get_clicker_stat("bulk_clicks"))
 	var times := 1 + bulk
 	
-	# Dispersar los números sin delay
+	# Dispersar los números sin delay (más fluido)
 	for i in times:
 		_add_points(true, i)  # Pasar el índice para dispersión
 	
@@ -153,7 +153,7 @@ func _spawn_float_label(value: int, offset_index: int = 0) -> void:
 	var lbl := Label.new()
 	lbl.text = "+%d" % value
 	lbl.add_theme_font_override("font", load("res://assets/fonts/ultrakill.ttf"))
-	lbl.add_theme_font_size_override("font_size", 42)
+	lbl.add_theme_font_size_override("font_size", 42)  # Tamaño uniforme para todos
 	
 	# Color RGB cíclico basado en el valor
 	var color := _get_value_color(value)
@@ -163,34 +163,26 @@ func _spawn_float_label(value: int, offset_index: int = 0) -> void:
 	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
 	lbl.add_theme_constant_override("outline_size", 4)
 	
-	# SPAWN CIRCULAR alrededor del núcleo
-	# Ángulo aleatorio para distribuir en círculo
-	var angle := randf() * TAU
+	# Posición MUY cercana al núcleo (rango ultra restrictivo)
+	# Dispersión extra para clicks múltiples usando offset_index
+	var dispersion_x := 12.0 + (offset_index * 3.0)  # Más dispersión con cada click
+	var dispersion_y := 8.0 + (offset_index * 2.0)
 	
-	# Distancia desde el centro (aumenta con cada click múltiple)
-	var min_distance := 15.0
-	var max_distance := 40.0 + (offset_index * 12.0)
-	var distance := randf_range(min_distance, max_distance)
+	var center_pos := nucleo_sprite.global_position + nucleo_sprite.size / 2.0
+	center_pos += Vector2(
+		randf_range(-dispersion_x, dispersion_x),
+		randf_range(-dispersion_y, dispersion_y)
+	)
+	lbl.global_position = center_pos
 	
-	# Calcular offset en dirección del ángulo
-	var offset := Vector2(cos(angle), sin(angle)) * distance
-	
-	# Obtener el centro del núcleo en coordenadas globales
-	var sprite_center := nucleo_sprite.global_position + nucleo_sprite.size / 2.0
-	
-	# Posición final del label
-	var spawn_pos := sprite_center + offset
-	lbl.position = spawn_pos
-	
-	# Añadir al root para que sea visible por encima de todo
 	get_tree().root.add_child(lbl)
 	
-	# Animación - subir verticalmente y desvanecer
-	var rise_distance := 100.0
-	var duration := 0.9
+	# Animación uniforme para todos
+	var distance := 80.0
+	var duration := 0.8
 	
 	var tw := lbl.create_tween().set_parallel(true)
-	tw.tween_property(lbl, "position:y", spawn_pos.y - rise_distance, duration)
+	tw.tween_property(lbl, "position:y", lbl.position.y - distance, duration)
 	tw.tween_property(lbl, "modulate:a", 0.0, duration)
 	
 	tw.chain().tween_callback(lbl.queue_free)
