@@ -16,7 +16,6 @@ func _ready() -> void:
 	var player := get_tree().get_first_node_in_group("player")
 	if player:
 		player.player_died.connect(_on_player_died)
-	# Buscar controles móviles
 	await get_tree().process_frame
 	_mobile = get_tree().get_first_node_in_group("mobile_controls")
 
@@ -35,8 +34,8 @@ func _show_pause() -> void:
 	pause_panel.visible  = true
 	title_label.text     = "PAUSA"
 	resume_button.visible = true
+	score_label.visible  = false
 	get_tree().paused    = true
-	# Deshabilitar controles móviles para que no bloqueen los botones
 	if _mobile:
 		_mobile.enabled = false
 
@@ -44,7 +43,15 @@ func show_game_over_menu(score: int = 0) -> void:
 	is_game_over         = true
 	pause_panel.visible  = true
 	title_label.text     = "GAME OVER"
-	score_label.text     = "Puntuación: %d" % score
+	
+	# Mostrar puntos perdidos si hay misión activa
+	if UpgradeManager.is_mission_active:
+		score_label.text = "Perdiste: %d puntos\nScore: %d" % [UpgradeManager.bet_points, score]
+		# Notificar pérdida de misión
+		UpgradeManager.fail_mission()
+	else:
+		score_label.text = "Score: %d" % score
+	
 	score_label.visible  = true
 	resume_button.visible = false
 	get_tree().paused    = true
@@ -54,7 +61,6 @@ func show_game_over_menu(score: int = 0) -> void:
 func hide_menu() -> void:
 	pause_panel.visible = false
 	get_tree().paused   = false
-	# Re-habilitar controles móviles al cerrar el menú
 	if _mobile:
 		_mobile.enabled = true
 
@@ -69,9 +75,17 @@ func _on_resume_button_pressed() -> void:
 	toggle_pause()
 
 func _on_restart_button_pressed() -> void:
+	# Si había misión activa, cancelarla (no devuelve puntos)
+	if UpgradeManager.is_mission_active:
+		UpgradeManager.cancel_mission()
+	
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 
 func _on_menu_button_pressed() -> void:
+	# Si había misión activa, cancelarla (no devuelve puntos)
+	if UpgradeManager.is_mission_active:
+		UpgradeManager.cancel_mission()
+	
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/Hub.tscn")

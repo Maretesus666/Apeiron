@@ -10,6 +10,14 @@ var scroll_pos: float = 0.0
 var was_scrolling: bool = false
 var button_tween: Tween = null
 
+const FONT := preload("res://assets/fonts/ultrakill.ttf")
+
+# Panel de apuesta
+var bet_panel: Control = null
+var bet_slider: HSlider = null
+var bet_label: Label = null
+var bet_reward_label: Label = null
+
 func _ready():
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -20,6 +28,7 @@ func _ready():
 	if nucleo.has_signal("mejoras_solicitadas"):
 		nucleo.mejoras_solicitadas.connect(panel_mejoras.abrir)
 	
+	_mejorar_botones_nave()
 	_actualizar_stats_nave()
 	_actualizar_stats_nucleo()
 	
@@ -27,29 +36,99 @@ func _ready():
 		_actualizar_stats_nave()
 		_actualizar_stats_nucleo()
 	)
+	
+	_build_bet_panel()
+
+func _mejorar_botones_nave() -> void:
+	var play_btn: Button = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/PlayButton
+	var mejoras_btn: Button = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/MejorasNaveBtn
+	
+	if play_btn:
+		_aplicar_estilo_boton(play_btn, Color(0.1, 0.5, 0.9), Color(0.15, 0.65, 1.0))
+	
+	if mejoras_btn:
+		_aplicar_estilo_boton(mejoras_btn, Color(0.8, 0.4, 0.1), Color(1.0, 0.55, 0.2))
+
+func _aplicar_estilo_boton(btn: Button, color_base: Color, color_hover: Color) -> void:
+	btn.add_theme_font_override("font", FONT)
+	btn.add_theme_font_size_override("font_size", 48)
+	
+	var style_normal := StyleBoxFlat.new()
+	style_normal.bg_color = color_base
+	style_normal.border_width_left = 4
+	style_normal.border_width_top = 4
+	style_normal.border_width_right = 4
+	style_normal.border_width_bottom = 4
+	style_normal.border_color = color_base.lightened(0.3)
+	style_normal.corner_radius_top_left = 8
+	style_normal.corner_radius_top_right = 8
+	style_normal.corner_radius_bottom_left = 8
+	style_normal.corner_radius_bottom_right = 8
+	style_normal.content_margin_left = 24
+	style_normal.content_margin_right = 24
+	style_normal.content_margin_top = 16
+	style_normal.content_margin_bottom = 16
+	btn.add_theme_stylebox_override("normal", style_normal)
+	
+	var style_hover := StyleBoxFlat.new()
+	style_hover.bg_color = color_hover
+	style_hover.border_width_left = 4
+	style_hover.border_width_top = 4
+	style_hover.border_width_right = 4
+	style_hover.border_width_bottom = 4
+	style_hover.border_color = color_hover.lightened(0.4)
+	style_hover.corner_radius_top_left = 8
+	style_hover.corner_radius_top_right = 8
+	style_hover.corner_radius_bottom_left = 8
+	style_hover.corner_radius_bottom_right = 8
+	style_hover.content_margin_left = 24
+	style_hover.content_margin_right = 24
+	style_hover.content_margin_top = 16
+	style_hover.content_margin_bottom = 16
+	btn.add_theme_stylebox_override("hover", style_hover)
+	
+	var style_pressed := StyleBoxFlat.new()
+	style_pressed.bg_color = color_base.darkened(0.2)
+	style_pressed.border_width_left = 4
+	style_pressed.border_width_top = 4
+	style_pressed.border_width_right = 4
+	style_pressed.border_width_bottom = 4
+	style_pressed.border_color = color_base
+	style_pressed.corner_radius_top_left = 8
+	style_pressed.corner_radius_top_right = 8
+	style_pressed.corner_radius_bottom_left = 8
+	style_pressed.corner_radius_bottom_right = 8
+	style_pressed.content_margin_left = 26
+	style_pressed.content_margin_right = 22
+	style_pressed.content_margin_top = 18
+	style_pressed.content_margin_bottom = 14
+	btn.add_theme_stylebox_override("pressed", style_pressed)
+	
+	btn.add_theme_color_override("font_color", Color.WHITE)
+	btn.add_theme_color_override("font_hover_color", Color.WHITE)
+	btn.add_theme_color_override("font_pressed_color", Color.WHITE)
+	btn.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
+	btn.add_theme_constant_override("outline_size", 3)
+	btn.custom_minimum_size = Vector2(0, 80)
 
 func _actualizar_stats_nave() -> void:
-	var lbl = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/InfoLabel
+	var lbl: Label = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/InfoLabel
 	
-	# Velocidad
-	var vel_base := 6000
-	var vel_bonus := int(UpgradeManager.get_ship_stat("max_speed"))
-	var vel_total := vel_base + vel_bonus
+	var vel_base: int = 6000
+	var vel_bonus: int = int(UpgradeManager.get_ship_stat("max_speed"))
+	var vel_total: int = vel_base + vel_bonus
 	
-	# Vida
-	var vida_base := 5
-	var vida_bonus := int(UpgradeManager.get_ship_stat("max_health"))
-	var vida_total := vida_base + vida_bonus
+	var vida_base: int = 5
+	var vida_bonus: int = int(UpgradeManager.get_ship_stat("max_health"))
+	var vida_total: int = vida_base + vida_bonus
 	
-	# Cadencia de disparo
-	var cadencia_base := 0.2
-	var cadencia_bonus := UpgradeManager.get_ship_stat("fire_rate")
-	var cadencia_total := maxf(0.05, cadencia_base - cadencia_bonus)
+	var cadencia_base: float = 0.2
+	var cadencia_bonus: float = UpgradeManager.get_ship_stat("fire_rate")
+	var cadencia_total: float = maxf(0.05, cadencia_base - cadencia_bonus)
 	
-	# Daño
-	var dano_base := 1
-	var dano_bonus := int(UpgradeManager.get_ship_stat("bullet_damage"))
-	var dano_total := dano_base + dano_bonus
+	var dano_base: int = 1
+	var dano_bonus: int = int(UpgradeManager.get_ship_stat("bullet_damage"))
+	var dano_total: int = dano_base + dano_bonus
 	
 	lbl.text = "NAVE\n"
 	lbl.text += "===================\n"
@@ -61,11 +140,160 @@ func _actualizar_stats_nave() -> void:
 	lbl.text += "Puntos: %d" % UpgradeManager.clicker_points
 
 func _actualizar_stats_nucleo() -> void:
-	# Esto podría mostrar stats del clicker en algún lugar si quieres
 	pass
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# PANEL DE APUESTA
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _build_bet_panel() -> void:
+	bet_panel = Control.new()
+	bet_panel.name = "BetPanel"
+	bet_panel.visible = false
+	bet_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bet_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(bet_panel)
+	
+	# Overlay oscuro
+	var overlay := ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.85)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	bet_panel.add_child(overlay)
+	
+	# Panel central
+	var center_panel := PanelContainer.new()
+	center_panel.set_anchors_preset(Control.PRESET_CENTER)
+	center_panel.custom_minimum_size = Vector2(600, 400)
+	center_panel.position = Vector2(-300, -200)
+	
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.12, 0.18, 0.98)
+	style.border_width_left = 4
+	style.border_width_top = 4
+	style.border_width_right = 4
+	style.border_width_bottom = 4
+	style.border_color = Color(0.3, 0.6, 1.0, 0.9)
+	style.corner_radius_top_left = 15
+	style.corner_radius_top_right = 15
+	style.corner_radius_bottom_left = 15
+	style.corner_radius_bottom_right = 15
+	center_panel.add_theme_stylebox_override("panel", style)
+	bet_panel.add_child(center_panel)
+	
+	# Contenido
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 40)
+	margin.add_theme_constant_override("margin_right", 40)
+	margin.add_theme_constant_override("margin_top", 30)
+	margin.add_theme_constant_override("margin_bottom", 30)
+	center_panel.add_child(margin)
+	
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 25)
+	margin.add_child(vbox)
+	
+	# Título
+	var title := Label.new()
+	title.text = "INICIAR MISIÓN"
+	title.add_theme_font_override("font", FONT)
+	title.add_theme_font_size_override("font_size", 42)
+	title.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(title)
+	
+	# Descripción
+	var desc := Label.new()
+	desc.text = "Apuesta puntos clicker para multiplicarlos\nSi completas el objetivo: GANAS x2\nSi mueres: PIERDES TODO"
+	desc.add_theme_font_override("font", FONT)
+	desc.add_theme_font_size_override("font_size", 18)
+	desc.add_theme_color_override("font_color", Color(0.8, 0.8, 0.9))
+	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(desc)
+	
+	var sep := HSeparator.new()
+	vbox.add_child(sep)
+	
+	# Slider de apuesta
+	var slider_container := VBoxContainer.new()
+	slider_container.add_theme_constant_override("separation", 12)
+	vbox.add_child(slider_container)
+	
+	bet_label = Label.new()
+	bet_label.text = "Apuesta: 0 puntos"
+	bet_label.add_theme_font_override("font", FONT)
+	bet_label.add_theme_font_size_override("font_size", 28)
+	bet_label.add_theme_color_override("font_color", Color(1, 0.95, 0.3))
+	bet_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	slider_container.add_child(bet_label)
+	
+	bet_slider = HSlider.new()
+	bet_slider.min_value = 0
+	bet_slider.max_value = UpgradeManager.clicker_points
+	bet_slider.step = 10
+	bet_slider.value = 0
+	bet_slider.custom_minimum_size = Vector2(0, 40)
+	bet_slider.value_changed.connect(_on_bet_slider_changed)
+	slider_container.add_child(bet_slider)
+	
+	bet_reward_label = Label.new()
+	bet_reward_label.text = "Recompensa si ganas: 0 pts"
+	bet_reward_label.add_theme_font_override("font", FONT)
+	bet_reward_label.add_theme_font_size_override("font_size", 20)
+	bet_reward_label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
+	bet_reward_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	slider_container.add_child(bet_reward_label)
+	
+	var sep2 := HSeparator.new()
+	vbox.add_child(sep2)
+	
+	# Botones
+	var btn_container := HBoxContainer.new()
+	btn_container.add_theme_constant_override("separation", 20)
+	btn_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_child(btn_container)
+	
+	var cancel_btn := Button.new()
+	cancel_btn.text = "CANCELAR"
+	cancel_btn.custom_minimum_size = Vector2(200, 60)
+	cancel_btn.add_theme_font_override("font", FONT)
+	cancel_btn.add_theme_font_size_override("font_size", 24)
+	cancel_btn.pressed.connect(_on_bet_cancel)
+	btn_container.add_child(cancel_btn)
+	
+	var start_btn := Button.new()
+	start_btn.text = "INICIAR MISIÓN"
+	start_btn.custom_minimum_size = Vector2(200, 60)
+	start_btn.add_theme_font_override("font", FONT)
+	start_btn.add_theme_font_size_override("font_size", 24)
+	start_btn.add_theme_color_override("font_color", Color(0.2, 1.0, 0.4))
+	start_btn.pressed.connect(_on_bet_start)
+	btn_container.add_child(start_btn)
+
+func _on_bet_slider_changed(value: float) -> void:
+	var bet: int = int(value)
+	bet_label.text = "Apuesta: %d puntos" % bet
+	var reward: int = int(bet * UpgradeManager.bet_multiplier)
+	bet_reward_label.text = "Recompensa si ganas: %d pts" % reward
+
+func _on_bet_cancel() -> void:
+	bet_panel.visible = false
+
+func _on_bet_start() -> void:
+	var bet_amount: int = int(bet_slider.value)
+	if UpgradeManager.start_mission(bet_amount):
+		get_tree().change_scene_to_file("res://scenes/game.tscn")
+
 func _on_play_button_pressed():
-	get_tree().change_scene_to_file("res://scenes/game.tscn")
+	# Actualizar slider con puntos actuales
+	bet_slider.max_value = UpgradeManager.clicker_points
+	bet_slider.value = min(bet_slider.value, UpgradeManager.clicker_points)
+	_on_bet_slider_changed(bet_slider.value)
+	
+	# Mostrar panel de apuesta
+	bet_panel.visible = true
+
+# ═══════════════════════════════════════════════════════════════════════════════
 
 func _on_scroll_container_scroll_started() -> void:
 	is_scrolling = true
@@ -75,12 +303,12 @@ func _on_scroll_container_scroll_ended() -> void:
 	was_scrolling = true
 	
 func _process(delta: float) -> void:
-	var max_scroll := scroller.get_h_scroll_bar().max_value
+	var max_scroll: float = scroller.get_h_scroll_bar().max_value
 	if max_scroll == 0:
 		return
 		
 	elif was_scrolling:
-		var progress := float(scroller.scroll_horizontal) / max_scroll
+		var progress: float = float(scroller.scroll_horizontal) / max_scroll
 		var target: float = round(progress)
 		scroll_pos = lerp(scroll_pos, max_scroll * target, 1.0 - pow(0.001, delta))
 		scroller.scroll_horizontal = int(scroll_pos)
@@ -97,7 +325,7 @@ func _process(delta: float) -> void:
 		animation_tree["parameters/blend_position"] = scroll_pos / max_scroll
 
 func _on_button_pressed(extra_arg_0: int) -> void:
-	var max_scroll := scroller.get_h_scroll_bar().max_value
+	var max_scroll: float = scroller.get_h_scroll_bar().max_value
 	var target_scroll: float = max_scroll * float(extra_arg_0)
 	var duration: float = 0.4
 

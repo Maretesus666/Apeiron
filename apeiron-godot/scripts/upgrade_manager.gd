@@ -6,6 +6,11 @@ extends Node
 var clicker_points: int = 0
 var game_points: int = 0
 
+# Sistema de apuesta para misiones
+var bet_points: int = 0  # Puntos apostados en la misión actual
+var bet_multiplier: float = 2.0  # Multiplicador base al completar
+var is_mission_active: bool = false
+
 # Mejoras de la nave (compradas con puntos del clicker)
 var ship_upgrades = {
 	"max_speed": {"level": 0, "cost": 50, "value": 100, "desc": "Velocidad máxima", "max_level": 999},
@@ -34,6 +39,9 @@ var clicker_upgrades = {
 signal clicker_points_changed(new_points)
 signal game_points_changed(new_points)
 signal upgrade_purchased(upgrade_type, upgrade_id)
+signal mission_started(bet_amount)
+signal mission_completed(reward)
+signal mission_failed(lost_amount)
 
 # Timer para passive income
 var passive_timer: float = 0.0
@@ -49,6 +57,69 @@ func _process(delta: float) -> void:
 		if passive_timer >= 1.0:
 			passive_timer = 0.0
 			add_clicker_points(int(passive))
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SISTEMA DE APUESTA
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func start_mission(bet_amount: int) -> bool:
+	if bet_amount <= 0 or bet_amount > clicker_points:
+		return false
+	
+	# Restar puntos apostados
+	clicker_points -= bet_amount
+	bet_points = bet_amount
+	is_mission_active = true
+	
+	clicker_points_changed.emit(clicker_points)
+	mission_started.emit(bet_amount)
+	save_data()
+	return true
+
+func complete_mission() -> void:
+	if not is_mission_active:
+		return
+	
+	# Calcular recompensa (apuesta × multiplicador)
+	var reward: int = int(bet_points * bet_multiplier)
+	
+	# Devolver puntos con ganancia
+	clicker_points += reward
+	
+	clicker_points_changed.emit(clicker_points)
+	mission_completed.emit(reward)
+	
+	# Reset misión
+	bet_points = 0
+	is_mission_active = false
+	save_data()
+
+func fail_mission() -> void:
+	if not is_mission_active:
+		return
+	
+	# Perder puntos apostados
+	var lost: int = bet_points
+	mission_failed.emit(lost)
+	
+	# Reset misión
+	bet_points = 0
+	is_mission_active = false
+	save_data()
+
+func cancel_mission() -> void:
+	if not is_mission_active:
+		return
+	
+	# Devolver puntos apostados (sin ganancia)
+	clicker_points += bet_points
+	clicker_points_changed.emit(clicker_points)
+	
+	bet_points = 0
+	is_mission_active = false
+	save_data()
+
+# ═══════════════════════════════════════════════════════════════════════════════
 
 # Agregar puntos
 func add_clicker_points(amount: int):
@@ -69,7 +140,6 @@ func buy_ship_upgrade(upgrade_id: String) -> bool:
 	var upgrade = ship_upgrades[upgrade_id]
 	var max_level = upgrade.get("max_level", 999)
 	
-	# Verificar si ya alcanzó el nivel máximo
 	if upgrade["level"] >= max_level:
 		return false
 	
@@ -92,7 +162,6 @@ func buy_clicker_upgrade(upgrade_id: String) -> bool:
 	var upgrade = clicker_upgrades[upgrade_id]
 	var max_level = upgrade.get("max_level", 999)
 	
-	# Verificar si ya alcanzó el nivel máximo
 	if upgrade["level"] >= max_level:
 		return false
 	
@@ -107,7 +176,7 @@ func buy_clicker_upgrade(upgrade_id: String) -> bool:
 		return true
 	return false
 
-# Obtener costos (escalan exponencialmente)
+# Obtener costos
 func get_ship_upgrade_cost(upgrade_id: String) -> int:
 	if not upgrade_id in ship_upgrades:
 		return 0
@@ -120,7 +189,7 @@ func get_clicker_upgrade_cost(upgrade_id: String) -> int:
 	var upgrade = clicker_upgrades[upgrade_id]
 	return int(upgrade["cost"] * pow(1.15, upgrade["level"]))
 
-# Obtener valores de mejoras
+# Obtener valores
 func get_ship_stat(stat_id: String) -> float:
 	if not stat_id in ship_upgrades:
 		return 0.0
@@ -139,7 +208,9 @@ func save_data():
 		"clicker_points": clicker_points,
 		"game_points": game_points,
 		"ship_upgrades": ship_upgrades,
-		"clicker_upgrades": clicker_upgrades
+		"clicker_upgrades": clicker_upgrades,
+		"bet_points": bet_points,
+		"is_mission_active": is_mission_active
 	}
 	
 	var file = FileAccess.open("user://upgrades.save", FileAccess.WRITE)
@@ -159,29 +230,27 @@ func load_data():
 		if save_data:
 			clicker_points = save_data.get("clicker_points", 0)
 			game_points = save_data.get("game_points", 0)
+			bet_points = save_data.get("bet_points", 0)
+			is_mission_active = save_data.get("is_mission_active", false)
 			
-			# Cargar upgrades guardadas
 			var loaded_ship = save_data.get("ship_upgrades", {})
 			var loaded_clicker = save_data.get("clicker_upgrades", {})
 			
-			# Migrar: agregar mejoras nuevas que no existían antes
 			_migrate_upgrades(ship_upgrades, loaded_ship)
 			_migrate_upgrades(clicker_upgrades, loaded_clicker)
 
-# Función auxiliar para migrar upgrades viejas a nuevas
 func _migrate_upgrades(default_dict: Dictionary, loaded_dict: Dictionary) -> void:
 	for key in default_dict.keys():
 		if key in loaded_dict:
-			# Mantener nivel guardado pero actualizar otros valores
 			var loaded_level = loaded_dict[key].get("level", 0)
 			var max_level = default_dict[key].get("max_level", 999)
-			# Asegurarse de que el nivel cargado no exceda el máximo
 			default_dict[key]["level"] = min(loaded_level, max_level)
-		# Si no existe en loaded_dict, se queda con valores por defecto (level = 0)
 
 func reset_all_data():
 	clicker_points = 0
 	game_points = 0
+	bet_points = 0
+	is_mission_active = false
 	for upgrade in ship_upgrades.values():
 		upgrade["level"] = 0
 	for upgrade in clicker_upgrades.values():
