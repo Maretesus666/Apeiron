@@ -1,35 +1,27 @@
-extends Node2D
+extends Area2D
 
-# Script para controlar la lógica del nivel
+signal objective_reached
 
-var objective_scene := preload("res://scenes/mission_objective.tscn")
-var objective_instance: Node2D = null
+@export var min_distance: float = 3000.0
+@export var max_distance: float = 8000.0
 
 func _ready() -> void:
-	# Esperar un frame para que todo esté inicializado
-	await get_tree().process_frame
-	
-	# Si hay una misión activa, spawnear el objetivo
-	if UpgradeManager.is_mission_active:
-		print("Misión activa detectada - spawneando objetivo")
-		_spawn_objective()
-	else:
-		print("No hay misión activa")
+	add_to_group("objective")
+	_place_randomly()
 
-func _spawn_objective() -> void:
-	if not objective_scene:
-		push_error("No se encontró la escena del objetivo")
+func _place_randomly() -> void:
+	var player = get_tree().get_first_node_in_group("player")
+	if not player:
+		await get_tree().process_frame
+		player = get_tree().get_first_node_in_group("player")
+	if not player:
 		return
-	
-	print("Instanciando objetivo...")
-	objective_instance = objective_scene.instantiate()
-	add_child(objective_instance)
-	print("Objetivo spawneado en: ", objective_instance.global_position)
-	
-	if objective_instance.has_signal("objective_reached"):
-		objective_instance.objective_reached.connect(_on_objective_reached)
-		print("Señal conectada")
+	var angle := randf() * TAU
+	var distance := randf_range(min_distance, max_distance)
+	global_position = player.global_position + Vector2(cos(angle), sin(angle)) * distance
 
-func _on_objective_reached() -> void:
-	print("¡Objetivo alcanzado!")
-	# El mission_objective.gd ya maneja la lógica de completar la misión
+func _on_body_entered(body: Node) -> void:
+	if body.is_in_group("player"):
+		objective_reached.emit()
+		UpgradeManager.complete_mission()
+		queue_free()

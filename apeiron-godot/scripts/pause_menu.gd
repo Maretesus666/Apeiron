@@ -12,6 +12,7 @@ var is_game_over: bool = false
 var _mobile: Node = null
 
 func _ready() -> void:
+	add_to_group("pause_menu")
 	hide_menu()
 	var player := get_tree().get_first_node_in_group("player")
 	if player:
@@ -31,11 +32,22 @@ func toggle_pause() -> void:
 		_hide()
 
 func _show_pause() -> void:
-	pause_panel.visible  = true
-	title_label.text     = "PAUSA"
+	pause_panel.visible   = true
+	title_label.text      = "PAUSA"
 	resume_button.visible = true
-	score_label.visible  = false
-	get_tree().paused    = true
+	score_label.visible   = false
+	get_tree().paused     = true
+	if _mobile:
+		_mobile.enabled = false
+
+func show_mission_complete(reward: int) -> void:
+	is_game_over        = true
+	pause_panel.visible = true
+	title_label.text    = "MISION COMPLETADA"
+	score_label.text    = "Ganaste: %d puntos\nScore: %d" % [reward, ScoreManager.score if ScoreManager else 0]
+	score_label.visible   = true
+	resume_button.visible = false
+	get_tree().paused     = true
 	if _mobile:
 		_mobile.enabled = false
 
@@ -44,17 +56,15 @@ func show_game_over_menu(score: int = 0) -> void:
 	pause_panel.visible  = true
 	title_label.text     = "GAME OVER"
 	
-	# Mostrar puntos perdidos si hay misión activa
 	if UpgradeManager.is_mission_active:
 		score_label.text = "Perdiste: %d puntos\nScore: %d" % [UpgradeManager.bet_points, score]
-		# Notificar pérdida de misión
 		UpgradeManager.fail_mission()
 	else:
 		score_label.text = "Score: %d" % score
 	
-	score_label.visible  = true
+	score_label.visible   = true
 	resume_button.visible = false
-	get_tree().paused    = true
+	get_tree().paused     = true
 	if _mobile:
 		_mobile.enabled = false
 
@@ -75,17 +85,13 @@ func _on_resume_button_pressed() -> void:
 	toggle_pause()
 
 func _on_restart_button_pressed() -> void:
-	# Si había misión activa, cancelarla (no devuelve puntos)
 	if UpgradeManager.is_mission_active:
 		UpgradeManager.cancel_mission()
-	
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 
 func _on_menu_button_pressed() -> void:
-	# Si había misión activa, cancelarla (no devuelve puntos)
 	if UpgradeManager.is_mission_active:
 		UpgradeManager.cancel_mission()
-	
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/Hub.tscn")

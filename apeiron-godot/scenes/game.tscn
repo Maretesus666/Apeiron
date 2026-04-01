@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://dn7ruopjurr62"]
+[gd_scene load_steps=14 format=3 uid="uid://dn7ruopjurr62"]
 
 [ext_resource type="Shader" uid="uid://cvu8ucill03dy" path="res://shaders/menu.gdshader" id="1_5evyv"]
 [ext_resource type="Script" uid="uid://nn6rx2sec51g" path="res://scripts/background_generator.gd" id="1_p57ef"]
@@ -90,6 +90,7 @@ offset_bottom = 40.0
 script = ExtResource("7_0tnpc")
 
 [node name="EnemyIndicators" type="CanvasLayer" parent="HUD"]
+visible = false
 script = ExtResource("8_vtaks")
 
 [node name="ObjectiveIndicator" type="Control" parent="HUD"]

@@ -30,12 +30,12 @@ func _spawn_objective() -> void:
 	if objective_instance.has_signal("objective_reached"):
 		objective_instance.objective_reached.connect(_on_objective_reached)
 	
-	print("✅ Objetivo spawneado en posición: ", objective_instance.global_position)
+	print("Objetivo spawneado en posición: ", objective_instance.global_position)
 
 func _on_objective_reached() -> void:
-	print("🎯 ¡Objetivo alcanzado!")
+	print(" ¡Objetivo alcanzado!")
 	# La lógica de completar misión está en mission_objective.gd
 
 func _on_player_died() -> void:
-	print("💀 Jugador murió")
+	print("Jugador murió")
 	# El pause_menu maneja el game over
