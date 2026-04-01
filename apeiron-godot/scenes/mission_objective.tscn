@@ -1,32 +1,31 @@
-[gd_scene load_steps=4 format=3 uid="uid://bb8dni2kspiif"]
+[gd_scene load_steps=4 format=3 uid="uid://f7fosc67n6jk"]
 
 [ext_resource type="Script" uid="uid://gf7fxghlfpgl" path="res://scripts/mission_objective.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://b1fv6d1lu14v" path="res://assets/sprites/nave.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://dsqmf3qkp4ovd" path="res://assets/sprites/nave1.png" id="2"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_obj"]
-radius = 100.0
+radius = 150.0
 
-[node name="MissionObjective" type="Area2D"]
-collision_layer = 0
+[node name="MissionObjective" type="Area2D" groups=["objective"]]
+collision_layer = 8
 script = ExtResource("1")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(0.3, 0.8, 1, 0.9)
-scale = Vector2(2, 2)
+rotation = 1.5708
+scale = Vector2(0.18, 0.18)
 texture = ExtResource("2")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_obj")
 
-[node name="CPUParticles2D" type="CPUParticles2D" parent="."]
-amount = 35
-lifetime = 1.5
-
 [node name="Label" type="Label" parent="."]
 offset_left = -100.0
-offset_top = -150.0
+offset_top = -180.0
 offset_right = 100.0
-offset_bottom = -100.0
+offset_bottom = -130.0
 text = "OBJETIVO"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
