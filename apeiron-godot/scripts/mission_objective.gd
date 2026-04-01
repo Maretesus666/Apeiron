@@ -24,71 +24,84 @@ func _ready() -> void:
 	if UpgradeManager.is_mission_active:
 		var reward: int = int(UpgradeManager.bet_points * UpgradeManager.bet_multiplier)
 		label.text = "OBJETIVO\n%d pts" % reward
+	
+	print("🎯 Objetivo listo en: ", global_position)
 
 func _setup_visuals() -> void:
 	# Sprite circular brillante
-	sprite.modulate = Color(0.3, 0.8, 1.0, 0.9)
-	sprite.scale = Vector2(2.0, 2.0)
+	if sprite:
+		sprite.modulate = Color(0.3, 0.8, 1.0, 0.9)
+		sprite.scale = Vector2(2.0, 2.0)
 	
 	# Partículas
-	particles.emitting = true
-	particles.amount = 35
-	particles.lifetime = 1.5
-	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
-	particles.emission_sphere_radius = 80.0
-	particles.direction = Vector2.ZERO
-	particles.spread = 180
-	particles.gravity = Vector2.ZERO
-	particles.initial_velocity_min = 30
-	particles.initial_velocity_max = 80
-	particles.scale_amount_min = 3.0
-	particles.scale_amount_max = 7.0
-	particles.color = Color(0.4, 0.9, 1.0, 0.8)
-	
-	var gradient := Gradient.new()
-	gradient.colors = PackedColorArray([
-		Color(0.5, 1.0, 1.0, 1.0),
-		Color(0.3, 0.7, 1.0, 0.6),
-		Color(0.1, 0.3, 0.5, 0.0)
-	])
-	gradient.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
-	particles.color_ramp = gradient
+	if particles:
+		particles.emitting = true
+		particles.amount = 35
+		particles.lifetime = 1.5
+		particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+		particles.emission_sphere_radius = 80.0
+		particles.direction = Vector2.ZERO
+		particles.spread = 180
+		particles.gravity = Vector2.ZERO
+		particles.initial_velocity_min = 30
+		particles.initial_velocity_max = 80
+		particles.scale_amount_min = 3.0
+		particles.scale_amount_max = 7.0
+		particles.color = Color(0.4, 0.9, 1.0, 0.8)
+		
+		var gradient := Gradient.new()
+		gradient.colors = PackedColorArray([
+			Color(0.5, 1.0, 1.0, 1.0),
+			Color(0.3, 0.7, 1.0, 0.6),
+			Color(0.1, 0.3, 0.5, 0.0)
+		])
+		gradient.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
+		particles.color_ramp = gradient
 	
 	# Label flotante
-	label.add_theme_font_override("font", load("res://assets/fonts/ultrakill.ttf"))
-	label.add_theme_font_size_override("font_size", 32)
-	label.add_theme_color_override("font_color", Color(0.4, 1.0, 1.0))
-	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
-	label.add_theme_constant_override("outline_size", 3)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.position = Vector2(-100, -150)
+	if label:
+		label.add_theme_font_override("font", load("res://assets/fonts/ultrakill.ttf"))
+		label.add_theme_font_size_override("font_size", 32)
+		label.add_theme_color_override("font_color", Color(0.4, 1.0, 1.0))
+		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+		label.add_theme_constant_override("outline_size", 3)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.position = Vector2(-100, -150)
 
 func _position_objective() -> void:
 	# Posicionar lejos del spawn del jugador
 	var angle: float = randf() * TAU
 	var offset := Vector2(cos(angle), sin(angle)) * spawn_distance
 	global_position = offset
+	print("🎯 Objetivo posicionado en: ", global_position)
 
 func _process(delta: float) -> void:
 	# Efecto de pulso
-	if pulsing:
+	if pulsing and sprite:
 		pulse_time += delta * 2.0
 		var scale_factor: float = 1.0 + sin(pulse_time) * 0.15
 		sprite.scale = Vector2.ONE * 2.0 * scale_factor
 		sprite.modulate.a = 0.7 + sin(pulse_time * 1.5) * 0.2
 	
 	# Rotar partículas
-	particles.rotation += delta * 0.3
+	if particles:
+		particles.rotation += delta * 0.3
 	
 	# Actualizar distancia en label
-	if player and is_instance_valid(player):
+	if player and is_instance_valid(player) and label:
 		var dist: float = global_position.distance_to(player.global_position)
 		if dist > 500:
-			label.text = "OBJETIVO\n%.0fm" % (dist / 100.0)
+			if UpgradeManager.is_mission_active:
+				var reward: int = int(UpgradeManager.bet_points * UpgradeManager.bet_multiplier)
+				label.text = "OBJETIVO\n%.0fm\n+%d pts" % [dist / 100.0, reward]
+			else:
+				label.text = "OBJETIVO\n%.0fm" % (dist / 100.0)
 
 func _on_body_entered(body: Node) -> void:
+	print("👤 Colisión detectada con: ", body.name)
 	if body.is_in_group("player"):
+		print("✅ ¡Jugador alcanzó el objetivo!")
 		_complete_objective()
 
 func _complete_objective() -> void:
@@ -99,7 +112,9 @@ func _complete_objective() -> void:
 	_create_victory_particles()
 	
 	# Notificar al UpgradeManager
-	UpgradeManager.complete_mission()
+	if UpgradeManager.is_mission_active:
+		UpgradeManager.complete_mission()
+		print("💰 Misión completada, puntos otorgados")
 	
 	# Mostrar mensaje de victoria
 	_show_victory_message()
@@ -134,8 +149,12 @@ func _create_victory_particles() -> void:
 		victory_particles.queue_free()
 
 func _show_victory_message() -> void:
+	var reward := 0
+	if UpgradeManager.is_mission_active:
+		reward = int(UpgradeManager.bet_points * UpgradeManager.bet_multiplier)
+	
 	var msg := Label.new()
-	msg.text = "¡MISIÓN COMPLETADA!\n+%d PUNTOS" % int(UpgradeManager.bet_points * UpgradeManager.bet_multiplier)
+	msg.text = "¡MISIÓN COMPLETADA!\n+%d PUNTOS" % reward
 	msg.add_theme_font_override("font", load("res://assets/fonts/ultrakill.ttf"))
 	msg.add_theme_font_size_override("font_size", 56)
 	msg.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4))
@@ -150,6 +169,7 @@ func _show_victory_message() -> void:
 	
 	# Agregar a un CanvasLayer para que siempre esté visible
 	var layer := CanvasLayer.new()
+	layer.layer = 100  # Asegurar que esté encima de todo
 	layer.add_child(msg)
 	get_tree().root.add_child(layer)
 	
