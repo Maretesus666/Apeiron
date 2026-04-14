@@ -28,6 +28,8 @@ func _ready():
 	if nucleo.has_signal("mejoras_solicitadas"):
 		nucleo.mejoras_solicitadas.connect(panel_mejoras.abrir)
 	
+	_mejorar_info_label()
+	_mejorar_espaciado_nave()
 	_mejorar_botones_nave()
 	_actualizar_stats_nave()
 	_actualizar_stats_nucleo()
@@ -38,6 +40,22 @@ func _ready():
 	)
 	
 	_build_bet_panel()
+
+func _mejorar_info_label() -> void:
+	var info_label: Label = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/InfoLabel
+	if info_label:
+		info_label.text = "◈  NAVE  ◈"
+		info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		info_label.add_theme_font_override("font", FONT)
+		info_label.add_theme_font_size_override("font_size", 38)
+		info_label.add_theme_color_override("font_color", Color(0.95, 0.95, 0.95, 1.0))
+		info_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+		info_label.add_theme_constant_override("outline_size", 3)
+
+func _mejorar_espaciado_nave() -> void:
+	var vbox: VBoxContainer = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer
+	if vbox:
+		vbox.add_theme_constant_override("separation", 18)
 
 func _mejorar_botones_nave() -> void:
 	var play_btn: Button = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/PlayButton
@@ -77,9 +95,6 @@ func _aplicar_estilo_boton(btn: Button, tipo: String) -> void:
 	style_normal.content_margin_right = 30
 	style_normal.content_margin_top = 20
 	style_normal.content_margin_bottom = 20
-	style_normal.shadow_color = Color(0, 0, 0, 0.4)
-	style_normal.shadow_size = 4
-	style_normal.shadow_offset = Vector2(0, 2)
 	btn.add_theme_stylebox_override("normal", style_normal)
 	
 	# Estado hover
@@ -98,9 +113,6 @@ func _aplicar_estilo_boton(btn: Button, tipo: String) -> void:
 	style_hover.content_margin_right = 30
 	style_hover.content_margin_top = 20
 	style_hover.content_margin_bottom = 20
-	style_hover.shadow_color = Color(0, 0, 0, 0.5)
-	style_hover.shadow_size = 6
-	style_hover.shadow_offset = Vector2(0, 3)
 	btn.add_theme_stylebox_override("hover", style_hover)
 	
 	# Estado pressed
@@ -119,9 +131,6 @@ func _aplicar_estilo_boton(btn: Button, tipo: String) -> void:
 	style_pressed.content_margin_right = 28
 	style_pressed.content_margin_top = 22
 	style_pressed.content_margin_bottom = 18
-	style_pressed.shadow_color = Color(0, 0, 0, 0.3)
-	style_pressed.shadow_size = 2
-	style_pressed.shadow_offset = Vector2(0, 1)
 	btn.add_theme_stylebox_override("pressed", style_pressed)
 	
 	# Colores de texto
@@ -133,32 +142,186 @@ func _aplicar_estilo_boton(btn: Button, tipo: String) -> void:
 	btn.custom_minimum_size = Vector2(0, 90)
 
 func _actualizar_stats_nave() -> void:
-	var lbl: Label = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/InfoLabel
+	var container: VBoxContainer = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer
 	
-	var vel_base: int = 6000
-	var vel_bonus: int = int(UpgradeManager.get_ship_stat("max_speed"))
-	var vel_total: int = vel_base + vel_bonus
+	# Buscar o crear el contenedor de stats
+	var stats_container = container.get_node_or_null("StatsContainer")
+	if stats_container:
+		stats_container.queue_free()
 	
-	var vida_base: int = 5
-	var vida_bonus: int = int(UpgradeManager.get_ship_stat("max_health"))
-	var vida_total: int = vida_base + vida_bonus
+	# Crear nuevo contenedor elegante
+	stats_container = _crear_stats_container()
+	stats_container.name = "StatsContainer"
 	
-	var cadencia_base: float = 0.2
-	var cadencia_bonus: float = UpgradeManager.get_ship_stat("fire_rate")
-	var cadencia_total: float = maxf(0.05, cadencia_base - cadencia_bonus)
+	# Insertar después del InfoLabel y antes de PlayButton
+	var info_label = container.get_node_or_null("InfoLabel")
+	if info_label:
+		container.add_child(stats_container)
+		container.move_child(stats_container, info_label.get_index() + 1)
+	else:
+		container.add_child(stats_container)
 	
-	var dano_base: int = 1
-	var dano_bonus: int = int(UpgradeManager.get_ship_stat("bullet_damage"))
-	var dano_total: int = dano_base + dano_bonus
+	# Calcular estadísticas
+	var stats = {
+		"Velocidad": {"base": 6000, "bonus": int(UpgradeManager.get_ship_stat("max_speed"))},
+		"Vida": {"base": 5, "bonus": int(UpgradeManager.get_ship_stat("max_health"))},
+		"Daño": {"base": 1, "bonus": int(UpgradeManager.get_ship_stat("bullet_damage"))},
+		"Cadencia": {"base": 0.2, "bonus": UpgradeManager.get_ship_stat("fire_rate"), "inverse": true}
+	}
 	
-	lbl.text = "NAVE\n"
-	lbl.text += "===================\n"
-	lbl.text += "Velocidad: %d (+%d)\n" % [vel_total, vel_bonus]
-	lbl.text += "Vida: %d (+%d)\n" % [vida_total, vida_bonus]
-	lbl.text += "Dano: %d (+%d)\n" % [dano_total, dano_bonus]
-	lbl.text += "Cadencia: %.2fs\n" % cadencia_total
-	lbl.text += "===================\n"
-	lbl.text += "Puntos: %d" % UpgradeManager.clicker_points
+	# Agregar cada stat
+	for stat_name in stats.keys():
+		var stat_data = stats[stat_name]
+		_agregar_stat_row(stats_container, stat_name, stat_data)
+	
+	# Separador
+	var sep := HSeparator.new()
+	sep.add_theme_constant_override("separation", 16)
+	var sep_style := StyleBoxFlat.new()
+	sep_style.bg_color = Color(0.3, 0.3, 0.3, 0.5)
+	sep.add_theme_stylebox_override("separator", sep_style)
+	stats_container.add_child(sep)
+	
+	# Puntos disponibles
+	var puntos_container := HBoxContainer.new()
+	puntos_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	stats_container.add_child(puntos_container)
+	
+	var puntos_icon := Label.new()
+	puntos_icon.text = "◆"
+	puntos_icon.add_theme_font_override("font", FONT)
+	puntos_icon.add_theme_font_size_override("font_size", 24)
+	puntos_icon.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.9))
+	puntos_container.add_child(puntos_icon)
+	
+	var puntos_lbl := Label.new()
+	puntos_lbl.text = " PUNTOS: %s" % _format_number(UpgradeManager.clicker_points)
+	puntos_lbl.add_theme_font_override("font", FONT)
+	puntos_lbl.add_theme_font_size_override("font_size", 28)
+	puntos_lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.95))
+	puntos_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	puntos_lbl.add_theme_constant_override("outline_size", 2)
+	puntos_container.add_child(puntos_lbl)
+
+func _crear_stats_container() -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(0, 0)
+	
+	# Estilo del panel
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.08, 0.08, 0.85)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(0.35, 0.35, 0.35, 0.7)
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	panel.add_theme_stylebox_override("panel", style)
+	
+	# Margen interno
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 24)
+	margin.add_theme_constant_override("margin_right", 24)
+	margin.add_theme_constant_override("margin_top", 20)
+	margin.add_theme_constant_override("margin_bottom", 20)
+	panel.add_child(margin)
+	
+	# VBox para las stats
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 14)
+	margin.add_child(vbox)
+	
+	return panel
+
+func _agregar_stat_row(container: VBoxContainer, nombre: String, data: Dictionary) -> void:
+	var row := VBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	
+	# Header con nombre y valores
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 0)
+	row.add_child(header)
+	
+	# Nombre de la stat
+	var name_lbl := Label.new()
+	name_lbl.text = nombre.to_upper()
+	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_lbl.add_theme_font_override("font", FONT)
+	name_lbl.add_theme_font_size_override("font_size", 20)
+	name_lbl.add_theme_color_override("font_color", Color(0.75, 0.75, 0.75, 1.0))
+	header.add_child(name_lbl)
+	
+	# Valor
+	var valor_final: String
+	var bonus_text: String
+	
+	if data.get("inverse", false):
+		# Para cadencia (menor es mejor)
+		var total = maxf(0.05, data.base - data.bonus)
+		valor_final = "%.2fs" % total
+		if data.bonus > 0:
+			bonus_text = " (−%.2fs)" % data.bonus
+		else:
+			bonus_text = ""
+	else:
+		var total = data.base + data.bonus
+		valor_final = _format_number(total) if total >= 1000 else str(total)
+		if data.bonus > 0:
+			bonus_text = " (+%s)" % _format_number(data.bonus)
+		else:
+			bonus_text = ""
+	
+	var valor_lbl := Label.new()
+	valor_lbl.text = valor_final
+	valor_lbl.add_theme_font_override("font", FONT)
+	valor_lbl.add_theme_font_size_override("font_size", 26)
+	valor_lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 1.0))
+	valor_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
+	valor_lbl.add_theme_constant_override("outline_size", 2)
+	header.add_child(valor_lbl)
+	
+	if bonus_text != "":
+		var bonus_lbl := Label.new()
+		bonus_lbl.text = bonus_text
+		bonus_lbl.add_theme_font_override("font", FONT)
+		bonus_lbl.add_theme_font_size_override("font_size", 18)
+		bonus_lbl.add_theme_color_override("font_color", Color(0.5, 0.85, 0.5, 0.9))
+		header.add_child(bonus_lbl)
+	
+	# Barra de progreso visual (solo si hay bonus)
+	if data.bonus > 0 and not data.get("inverse", false):
+		var bar_bg := ColorRect.new()
+		bar_bg.custom_minimum_size = Vector2(0, 4)
+		bar_bg.color = Color(0.15, 0.15, 0.15, 0.9)
+		row.add_child(bar_bg)
+		
+		var bar_container := Control.new()
+		bar_container.custom_minimum_size = Vector2(0, 4)
+		bar_bg.add_child(bar_container)
+		
+		var bar_fill := ColorRect.new()
+		var total = data.base + data.bonus
+		var progress = clampf(float(data.bonus) / float(total), 0.0, 1.0)
+		bar_fill.custom_minimum_size = Vector2(0, 4)
+		bar_fill.size_flags_horizontal = Control.SIZE_FILL
+		bar_fill.color = Color(0.7, 0.7, 0.7, 0.95)
+		bar_container.add_child(bar_fill)
+		
+		# Animar el ancho de la barra
+		bar_fill.anchor_right = progress
+	
+	container.add_child(row)
+
+func _format_number(num: int) -> String:
+	if num >= 1_000_000:
+		return "%.1fM" % (num / 1_000_000.0)
+	elif num >= 1_000:
+		return "%.1fK" % (num / 1_000.0)
+	else:
+		return str(num)
 
 func _actualizar_stats_nucleo() -> void:
 	pass
