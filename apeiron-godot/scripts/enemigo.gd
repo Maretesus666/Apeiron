@@ -31,13 +31,49 @@ const HISTORY_SIZE := 4
 
 var _damage_cooldown: float = 0.0
 
+# ── Velocidad dinámica ────────────────────────────────────────────────────────
+# Cada enemigo elige su ventaja entre 5% y 10% al nacer y la mantiene.
+# Así no todos tienen exactamente el mismo bonus 
+var _speed_advantage: float = 1.0   # multiplicador sobre la velocidad del jugador
+
 func _ready() -> void:
 	add_to_group("enemies")
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
 	player = get_tree().get_first_node_in_group("player")
-	_wobble_phase = randf_range(0.0, TAU)
+	_wobble_phase    = randf_range(0.0, TAU)
+	_speed_advantage = randf_range(1.05, 1.10)   # 5-10 % más rápido que el jugador
 	set_meta("max_health", health)
+
+# ── Velocidad efectiva basada en el estado actual del jugador ─────────────────
+# Referencia = max(velocidad actual del jugador, 40 % de su velocidad máxima).
+# Esto evita que el enemigo quede estático cuando el jugador frena.
+# También suma la aceleración estimada del jugador para anticiparse.
+func _get_dynamic_max_speed() -> float:
+	if not player or not is_instance_valid(player):
+		return max_speed   # fallback al valor exportado
+
+	var player_max: float = player.max_speed if "max_speed" in player else 6000.0
+	var player_cur: float = player.velocity.length()
+
+	# Anticipa cuánto puede acelerar el jugador en el próximo instante
+	var player_accel: float = player.thrust_acceleration if "thrust_acceleration" in player else 6000.0
+	# Estimación conservadora: 0.1 s de aceleración
+	var projected_speed: float = player_cur + player_accel * 0.1
+
+	# Referencia: proyección pero sin exceder el máximo del jugador
+	var reference: float = minf(projected_speed, player_max)
+
+	# Piso: al menos 20 % del max para no quedarse parado cuando el jugador frena
+	reference = maxf(reference, player_max * 0.2)
+
+	return reference * _speed_advantage
+
+func _get_dynamic_accel() -> float:
+	# La aceleración debe ser suficiente para alcanzar max_speed 
+	return _get_dynamic_max_speed() * 1.5
+
+# ─────────────────────────────────────────────────────────────────────────────
 
 func _physics_process(delta: float) -> void:
 	if _damage_cooldown > 0.0:
@@ -53,8 +89,12 @@ func _physics_process(delta: float) -> void:
 
 	_check_player_proximity(delta)
 
-	var eff_max_speed: float = max_speed * (rage_speed_mult if _is_enraged else 1.0)
-	var eff_accel: float     = acceleration * (rage_accel_mult if _is_enraged else 1.0)
+	# Usar velocidad/aceleración dinámicas
+	var dyn_max_speed: float = _get_dynamic_max_speed()
+	var dyn_accel:     float = _get_dynamic_accel()
+
+	var eff_max_speed: float = dyn_max_speed * (rage_speed_mult if _is_enraged else 1.0)
+	var eff_accel:     float = dyn_accel     * (rage_accel_mult if _is_enraged else 1.0)
 
 	var desired_dir := _compute_direction(delta)
 	velocity += desired_dir * eff_accel * delta
@@ -102,7 +142,7 @@ func _compute_direction(delta: float) -> Vector2:
 	return chase_dir
 
 func _solve_intercept(player_vel: Vector2) -> Vector2:
-	var eff_speed: float    = max_speed * (rage_speed_mult if _is_enraged else 1.0)
+	var eff_speed: float    = _get_dynamic_max_speed() * (rage_speed_mult if _is_enraged else 1.0)
 	var solver_speed: float = lerp(velocity.length(), eff_speed, 0.6)
 	solver_speed = maxf(solver_speed, eff_speed * 0.4)
 
@@ -251,7 +291,6 @@ func _on_body_entered(body: Node) -> void:
 
 func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("player_bullet"):
-		# Obtener el daño de la bala (ahora mejorado por upgrades)
 		var bullet_damage := 1
 		if area.has_method("get_damage"):
 			bullet_damage = area.get_damage()

@@ -71,15 +71,13 @@ func _aplicar_estilo_boton(btn: Button, tipo: String) -> void:
 	btn.add_theme_font_override("font", FONT)
 	btn.add_theme_font_size_override("font_size", 52)
 	
-	# Paleta monocromática elegante
-	var bg_normal := Color(0.12, 0.12, 0.12, 0.95)      # Gris muy oscuro
-	var bg_hover := Color(0.22, 0.22, 0.22, 0.98)       # Gris oscuro
-	var bg_pressed := Color(0.08, 0.08, 0.08, 1.0)      # Negro casi puro
-	var border_normal := Color(0.45, 0.45, 0.45, 0.8)   # Gris medio
-	var border_hover := Color(0.85, 0.85, 0.85, 0.95)   # Gris claro
-	var border_pressed := Color(0.25, 0.25, 0.25, 0.9)  # Gris oscuro
+	var bg_normal := Color(0.12, 0.12, 0.12, 0.95)
+	var bg_hover := Color(0.22, 0.22, 0.22, 0.98)
+	var bg_pressed := Color(0.08, 0.08, 0.08, 1.0)
+	var border_normal := Color(0.45, 0.45, 0.45, 0.8)
+	var border_hover := Color(0.85, 0.85, 0.85, 0.95)
+	var border_pressed := Color(0.25, 0.25, 0.25, 0.9)
 	
-	# Estado normal
 	var style_normal := StyleBoxFlat.new()
 	style_normal.bg_color = bg_normal
 	style_normal.border_width_left = 3
@@ -97,7 +95,6 @@ func _aplicar_estilo_boton(btn: Button, tipo: String) -> void:
 	style_normal.content_margin_bottom = 20
 	btn.add_theme_stylebox_override("normal", style_normal)
 	
-	# Estado hover
 	var style_hover := StyleBoxFlat.new()
 	style_hover.bg_color = bg_hover
 	style_hover.border_width_left = 3
@@ -115,7 +112,6 @@ func _aplicar_estilo_boton(btn: Button, tipo: String) -> void:
 	style_hover.content_margin_bottom = 20
 	btn.add_theme_stylebox_override("hover", style_hover)
 	
-	# Estado pressed
 	var style_pressed := StyleBoxFlat.new()
 	style_pressed.bg_color = bg_pressed
 	style_pressed.border_width_left = 3
@@ -133,10 +129,9 @@ func _aplicar_estilo_boton(btn: Button, tipo: String) -> void:
 	style_pressed.content_margin_bottom = 18
 	btn.add_theme_stylebox_override("pressed", style_pressed)
 	
-	# Colores de texto
-	btn.add_theme_color_override("font_color", Color(0.95, 0.95, 0.95, 1.0))          # Blanco suave
-	btn.add_theme_color_override("font_hover_color", Color(1.0, 1.0, 1.0, 1.0))      # Blanco puro
-	btn.add_theme_color_override("font_pressed_color", Color(0.85, 0.85, 0.85, 1.0)) # Gris claro
+	btn.add_theme_color_override("font_color", Color(0.95, 0.95, 0.95, 1.0))
+	btn.add_theme_color_override("font_hover_color", Color(1.0, 1.0, 1.0, 1.0))
+	btn.add_theme_color_override("font_pressed_color", Color(0.85, 0.85, 0.85, 1.0))
 	btn.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	btn.add_theme_constant_override("outline_size", 4)
 	btn.custom_minimum_size = Vector2(0, 90)
@@ -144,18 +139,18 @@ func _aplicar_estilo_boton(btn: Button, tipo: String) -> void:
 func _actualizar_stats_nave() -> void:
 	var container: VBoxContainer = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer
 	
-	# Buscar o crear el contenedor de stats
+	# ── FIX: sacar del árbol primero para que queue_free no deje un nodo
+	# "fantasma" con el mismo nombre bloqueando la búsqueda del siguiente frame ──
 	var stats_container = container.get_node_or_null("StatsContainer")
 	if stats_container:
+		container.remove_child(stats_container)
 		stats_container.queue_free()
 	
-	# Crear nuevo contenedor elegante
 	var stats_dict = _crear_stats_container()
 	var stats_panel = stats_dict["panel"]
 	var stats_vbox = stats_dict["vbox"]
 	stats_panel.name = "StatsContainer"
 	
-	# Insertar después del InfoLabel y antes de PlayButton
 	var info_label = container.get_node_or_null("InfoLabel")
 	if info_label:
 		container.add_child(stats_panel)
@@ -163,7 +158,6 @@ func _actualizar_stats_nave() -> void:
 	else:
 		container.add_child(stats_panel)
 	
-	# Calcular estadísticas
 	var stats = {
 		"Velocidad": {"base": 6000, "bonus": int(UpgradeManager.get_ship_stat("max_speed"))},
 		"Vida": {"base": 5, "bonus": int(UpgradeManager.get_ship_stat("max_health"))},
@@ -171,12 +165,10 @@ func _actualizar_stats_nave() -> void:
 		"Cadencia": {"base": 0.2, "bonus": UpgradeManager.get_ship_stat("fire_rate"), "inverse": true}
 	}
 	
-	# Agregar cada stat
 	for stat_name in stats.keys():
 		var stat_data = stats[stat_name]
 		_agregar_stat_row(stats_vbox, stat_name, stat_data)
 	
-	# Separador
 	var sep := HSeparator.new()
 	sep.add_theme_constant_override("separation", 1)
 	var sep_style := StyleBoxFlat.new()
@@ -184,7 +176,6 @@ func _actualizar_stats_nave() -> void:
 	sep.add_theme_stylebox_override("separator", sep_style)
 	stats_vbox.add_child(sep)
 	
-	# Puntos disponibles
 	var puntos_container := HBoxContainer.new()
 	puntos_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	stats_vbox.add_child(puntos_container)
@@ -209,7 +200,6 @@ func _crear_stats_container() -> Dictionary:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(0, 0)
 	
-	# Estilo del panel
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.08, 0.08, 0.08, 0.85)
 	style.border_width_left = 2
@@ -223,7 +213,6 @@ func _crear_stats_container() -> Dictionary:
 	style.corner_radius_bottom_right = 8
 	panel.add_theme_stylebox_override("panel", style)
 	
-	# Margen interno
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 24)
 	margin.add_theme_constant_override("margin_right", 24)
@@ -231,7 +220,6 @@ func _crear_stats_container() -> Dictionary:
 	margin.add_theme_constant_override("margin_bottom", 20)
 	panel.add_child(margin)
 	
-	# VBox para las stats
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 1)
 	margin.add_child(vbox)
@@ -242,12 +230,10 @@ func _agregar_stat_row(container: VBoxContainer, nombre: String, data: Dictionar
 	var row := VBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	
-	# Header con nombre y valores
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 0)
 	row.add_child(header)
 	
-	# Nombre de la stat
 	var name_lbl := Label.new()
 	name_lbl.text = nombre.to_upper()
 	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -256,12 +242,10 @@ func _agregar_stat_row(container: VBoxContainer, nombre: String, data: Dictionar
 	name_lbl.add_theme_color_override("font_color", Color(0.75, 0.75, 0.75, 1.0))
 	header.add_child(name_lbl)
 	
-	# Valor
 	var valor_final: String
 	var bonus_text: String
 	
 	if data.get("inverse", false):
-		# Para cadencia (menor es mejor)
 		var total = maxf(0.05, data.base - data.bonus)
 		valor_final = "%.2fs" % total
 		if data.bonus > 0:
@@ -293,16 +277,11 @@ func _agregar_stat_row(container: VBoxContainer, nombre: String, data: Dictionar
 		bonus_lbl.add_theme_color_override("font_color", Color(0.5, 0.85, 0.5, 0.9))
 		header.add_child(bonus_lbl)
 	
-	# Barra de progreso visual (solo si hay bonus)
 	if data.bonus > 0 and not data.get("inverse", false):
 		var bar_bg := ColorRect.new()
 		bar_bg.custom_minimum_size = Vector2(0, 4)
 		bar_bg.color = Color(0.15, 0.15, 0.15, 0.9)
 		row.add_child(bar_bg)
-		
-		var bar_container := Control.new()
-		bar_container.custom_minimum_size = Vector2(0, 4)
-		bar_bg.add_child(bar_container)
 		
 		var bar_fill := ColorRect.new()
 		var total = data.base + data.bonus
@@ -310,9 +289,7 @@ func _agregar_stat_row(container: VBoxContainer, nombre: String, data: Dictionar
 		bar_fill.custom_minimum_size = Vector2(0, 4)
 		bar_fill.size_flags_horizontal = Control.SIZE_FILL
 		bar_fill.color = Color(0.7, 0.7, 0.7, 0.95)
-		bar_container.add_child(bar_fill)
-		
-		# Animar el ancho de la barra
+		bar_bg.add_child(bar_fill)
 		bar_fill.anchor_right = progress
 	
 	container.add_child(row)
@@ -340,14 +317,12 @@ func _build_bet_panel() -> void:
 	bet_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(bet_panel)
 	
-	# Overlay oscuro
 	var overlay := ColorRect.new()
 	overlay.color = Color(0, 0, 0, 0.85)
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	bet_panel.add_child(overlay)
 	
-	# Panel central
 	var center_panel := PanelContainer.new()
 	center_panel.set_anchors_preset(Control.PRESET_CENTER)
 	center_panel.custom_minimum_size = Vector2(600, 400)
@@ -367,7 +342,6 @@ func _build_bet_panel() -> void:
 	center_panel.add_theme_stylebox_override("panel", style)
 	bet_panel.add_child(center_panel)
 	
-	# Contenido
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 40)
 	margin.add_theme_constant_override("margin_right", 40)
@@ -379,7 +353,6 @@ func _build_bet_panel() -> void:
 	vbox.add_theme_constant_override("separation", 25)
 	margin.add_child(vbox)
 	
-	# Título
 	var title := Label.new()
 	title.text = "INICIAR MISIÓN"
 	title.add_theme_font_override("font", FONT)
@@ -388,7 +361,6 @@ func _build_bet_panel() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(title)
 	
-	# Descripción
 	var desc := Label.new()
 	desc.text = "Apuesta puntos clicker para multiplicarlos\nSi completas el objetivo: GANAS x2\nSi mueres: PIERDES TODO"
 	desc.add_theme_font_override("font", FONT)
@@ -400,7 +372,6 @@ func _build_bet_panel() -> void:
 	var sep := HSeparator.new()
 	vbox.add_child(sep)
 	
-	# Slider de apuesta
 	var slider_container := VBoxContainer.new()
 	slider_container.add_theme_constant_override("separation", 12)
 	vbox.add_child(slider_container)
@@ -433,7 +404,6 @@ func _build_bet_panel() -> void:
 	var sep2 := HSeparator.new()
 	vbox.add_child(sep2)
 	
-	# Botones
 	var btn_container := HBoxContainer.new()
 	btn_container.add_theme_constant_override("separation", 2)
 	btn_container.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -471,12 +441,9 @@ func _on_bet_start() -> void:
 		get_tree().change_scene_to_file("res://scenes/game.tscn")
 
 func _on_play_button_pressed():
-	# Actualizar slider con puntos actuales
 	bet_slider.max_value = UpgradeManager.clicker_points
 	bet_slider.value = min(bet_slider.value, UpgradeManager.clicker_points)
 	_on_bet_slider_changed(bet_slider.value)
-	
-	# Mostrar panel de apuesta
 	bet_panel.visible = true
 
 # ═══════════════════════════════════════════════════════════════════════════════
