@@ -55,7 +55,7 @@ func _mejorar_info_label() -> void:
 func _mejorar_espaciado_nave() -> void:
 	var vbox: VBoxContainer = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer
 	if vbox:
-		vbox.add_theme_constant_override("separation", 18)
+		vbox.add_theme_constant_override("separation", 0)
 
 func _mejorar_botones_nave() -> void:
 	var play_btn: Button = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/PlayButton
@@ -150,16 +150,18 @@ func _actualizar_stats_nave() -> void:
 		stats_container.queue_free()
 	
 	# Crear nuevo contenedor elegante
-	stats_container = _crear_stats_container()
-	stats_container.name = "StatsContainer"
+	var stats_dict = _crear_stats_container()
+	var stats_panel = stats_dict["panel"]
+	var stats_vbox = stats_dict["vbox"]
+	stats_panel.name = "StatsContainer"
 	
 	# Insertar después del InfoLabel y antes de PlayButton
 	var info_label = container.get_node_or_null("InfoLabel")
 	if info_label:
-		container.add_child(stats_container)
-		container.move_child(stats_container, info_label.get_index() + 1)
+		container.add_child(stats_panel)
+		container.move_child(stats_panel, info_label.get_index() + 1)
 	else:
-		container.add_child(stats_container)
+		container.add_child(stats_panel)
 	
 	# Calcular estadísticas
 	var stats = {
@@ -172,20 +174,20 @@ func _actualizar_stats_nave() -> void:
 	# Agregar cada stat
 	for stat_name in stats.keys():
 		var stat_data = stats[stat_name]
-		_agregar_stat_row(stats_container, stat_name, stat_data)
+		_agregar_stat_row(stats_vbox, stat_name, stat_data)
 	
 	# Separador
 	var sep := HSeparator.new()
-	sep.add_theme_constant_override("separation", 16)
+	sep.add_theme_constant_override("separation", 1)
 	var sep_style := StyleBoxFlat.new()
 	sep_style.bg_color = Color(0.3, 0.3, 0.3, 0.5)
 	sep.add_theme_stylebox_override("separator", sep_style)
-	stats_container.add_child(sep)
+	stats_vbox.add_child(sep)
 	
 	# Puntos disponibles
 	var puntos_container := HBoxContainer.new()
 	puntos_container.alignment = BoxContainer.ALIGNMENT_CENTER
-	stats_container.add_child(puntos_container)
+	stats_vbox.add_child(puntos_container)
 	
 	var puntos_icon := Label.new()
 	puntos_icon.text = "◆"
@@ -203,7 +205,7 @@ func _actualizar_stats_nave() -> void:
 	puntos_lbl.add_theme_constant_override("outline_size", 2)
 	puntos_container.add_child(puntos_lbl)
 
-func _crear_stats_container() -> PanelContainer:
+func _crear_stats_container() -> Dictionary:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(0, 0)
 	
@@ -231,10 +233,10 @@ func _crear_stats_container() -> PanelContainer:
 	
 	# VBox para las stats
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 14)
+	vbox.add_theme_constant_override("separation", 1)
 	margin.add_child(vbox)
 	
-	return panel
+	return {"panel": panel, "vbox": vbox}
 
 func _agregar_stat_row(container: VBoxContainer, nombre: String, data: Dictionary) -> void:
 	var row := VBoxContainer.new()
@@ -433,7 +435,7 @@ func _build_bet_panel() -> void:
 	
 	# Botones
 	var btn_container := HBoxContainer.new()
-	btn_container.add_theme_constant_override("separation", 20)
+	btn_container.add_theme_constant_override("separation", 2)
 	btn_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox.add_child(btn_container)
 	
