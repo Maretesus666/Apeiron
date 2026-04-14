@@ -44,72 +44,93 @@ func _mejorar_botones_nave() -> void:
 	var mejoras_btn: Button = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/MejorasNaveBtn
 	
 	if play_btn:
-		_aplicar_estilo_boton(play_btn, Color(0.1, 0.5, 0.9), Color(0.15, 0.65, 1.0))
+		_aplicar_estilo_boton(play_btn, "JUGAR")
 	
 	if mejoras_btn:
-		_aplicar_estilo_boton(mejoras_btn, Color(0.8, 0.4, 0.1), Color(1.0, 0.55, 0.2))
+		_aplicar_estilo_boton(mejoras_btn, "MEJORAS")
 
-func _aplicar_estilo_boton(btn: Button, color_base: Color, color_hover: Color) -> void:
+func _aplicar_estilo_boton(btn: Button, tipo: String) -> void:
 	btn.add_theme_font_override("font", FONT)
-	btn.add_theme_font_size_override("font_size", 48)
+	btn.add_theme_font_size_override("font_size", 52)
 	
+	# Paleta monocromática elegante
+	var bg_normal := Color(0.12, 0.12, 0.12, 0.95)      # Gris muy oscuro
+	var bg_hover := Color(0.22, 0.22, 0.22, 0.98)       # Gris oscuro
+	var bg_pressed := Color(0.08, 0.08, 0.08, 1.0)      # Negro casi puro
+	var border_normal := Color(0.45, 0.45, 0.45, 0.8)   # Gris medio
+	var border_hover := Color(0.85, 0.85, 0.85, 0.95)   # Gris claro
+	var border_pressed := Color(0.25, 0.25, 0.25, 0.9)  # Gris oscuro
+	
+	# Estado normal
 	var style_normal := StyleBoxFlat.new()
-	style_normal.bg_color = color_base
-	style_normal.border_width_left = 4
-	style_normal.border_width_top = 4
-	style_normal.border_width_right = 4
-	style_normal.border_width_bottom = 4
-	style_normal.border_color = color_base.lightened(0.3)
-	style_normal.corner_radius_top_left = 8
-	style_normal.corner_radius_top_right = 8
-	style_normal.corner_radius_bottom_left = 8
-	style_normal.corner_radius_bottom_right = 8
-	style_normal.content_margin_left = 24
-	style_normal.content_margin_right = 24
-	style_normal.content_margin_top = 16
-	style_normal.content_margin_bottom = 16
+	style_normal.bg_color = bg_normal
+	style_normal.border_width_left = 3
+	style_normal.border_width_top = 3
+	style_normal.border_width_right = 3
+	style_normal.border_width_bottom = 3
+	style_normal.border_color = border_normal
+	style_normal.corner_radius_top_left = 6
+	style_normal.corner_radius_top_right = 6
+	style_normal.corner_radius_bottom_left = 6
+	style_normal.corner_radius_bottom_right = 6
+	style_normal.content_margin_left = 30
+	style_normal.content_margin_right = 30
+	style_normal.content_margin_top = 20
+	style_normal.content_margin_bottom = 20
+	style_normal.shadow_color = Color(0, 0, 0, 0.4)
+	style_normal.shadow_size = 4
+	style_normal.shadow_offset = Vector2(0, 2)
 	btn.add_theme_stylebox_override("normal", style_normal)
 	
+	# Estado hover
 	var style_hover := StyleBoxFlat.new()
-	style_hover.bg_color = color_hover
-	style_hover.border_width_left = 4
-	style_hover.border_width_top = 4
-	style_hover.border_width_right = 4
-	style_hover.border_width_bottom = 4
-	style_hover.border_color = color_hover.lightened(0.4)
-	style_hover.corner_radius_top_left = 8
-	style_hover.corner_radius_top_right = 8
-	style_hover.corner_radius_bottom_left = 8
-	style_hover.corner_radius_bottom_right = 8
-	style_hover.content_margin_left = 24
-	style_hover.content_margin_right = 24
-	style_hover.content_margin_top = 16
-	style_hover.content_margin_bottom = 16
+	style_hover.bg_color = bg_hover
+	style_hover.border_width_left = 3
+	style_hover.border_width_top = 3
+	style_hover.border_width_right = 3
+	style_hover.border_width_bottom = 3
+	style_hover.border_color = border_hover
+	style_hover.corner_radius_top_left = 6
+	style_hover.corner_radius_top_right = 6
+	style_hover.corner_radius_bottom_left = 6
+	style_hover.corner_radius_bottom_right = 6
+	style_hover.content_margin_left = 30
+	style_hover.content_margin_right = 30
+	style_hover.content_margin_top = 20
+	style_hover.content_margin_bottom = 20
+	style_hover.shadow_color = Color(0, 0, 0, 0.5)
+	style_hover.shadow_size = 6
+	style_hover.shadow_offset = Vector2(0, 3)
 	btn.add_theme_stylebox_override("hover", style_hover)
 	
+	# Estado pressed
 	var style_pressed := StyleBoxFlat.new()
-	style_pressed.bg_color = color_base.darkened(0.2)
-	style_pressed.border_width_left = 4
-	style_pressed.border_width_top = 4
-	style_pressed.border_width_right = 4
-	style_pressed.border_width_bottom = 4
-	style_pressed.border_color = color_base
-	style_pressed.corner_radius_top_left = 8
-	style_pressed.corner_radius_top_right = 8
-	style_pressed.corner_radius_bottom_left = 8
-	style_pressed.corner_radius_bottom_right = 8
-	style_pressed.content_margin_left = 26
-	style_pressed.content_margin_right = 22
-	style_pressed.content_margin_top = 18
-	style_pressed.content_margin_bottom = 14
+	style_pressed.bg_color = bg_pressed
+	style_pressed.border_width_left = 3
+	style_pressed.border_width_top = 3
+	style_pressed.border_width_right = 3
+	style_pressed.border_width_bottom = 3
+	style_pressed.border_color = border_pressed
+	style_pressed.corner_radius_top_left = 6
+	style_pressed.corner_radius_top_right = 6
+	style_pressed.corner_radius_bottom_left = 6
+	style_pressed.corner_radius_bottom_right = 6
+	style_pressed.content_margin_left = 32
+	style_pressed.content_margin_right = 28
+	style_pressed.content_margin_top = 22
+	style_pressed.content_margin_bottom = 18
+	style_pressed.shadow_color = Color(0, 0, 0, 0.3)
+	style_pressed.shadow_size = 2
+	style_pressed.shadow_offset = Vector2(0, 1)
 	btn.add_theme_stylebox_override("pressed", style_pressed)
 	
-	btn.add_theme_color_override("font_color", Color.WHITE)
-	btn.add_theme_color_override("font_hover_color", Color.WHITE)
-	btn.add_theme_color_override("font_pressed_color", Color.WHITE)
-	btn.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
-	btn.add_theme_constant_override("outline_size", 3)
-	btn.custom_minimum_size = Vector2(0, 80)
+	# Colores de texto
+	btn.add_theme_color_override("font_color", Color(0.95, 0.95, 0.95, 1.0))          # Blanco suave
+	btn.add_theme_color_override("font_hover_color", Color(1.0, 1.0, 1.0, 1.0))      # Blanco puro
+	btn.add_theme_color_override("font_pressed_color", Color(0.85, 0.85, 0.85, 1.0)) # Gris claro
+	btn.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	btn.add_theme_constant_override("outline_size", 4)
+	btn.custom_minimum_size = Vector2(0, 90)
 
 func _actualizar_stats_nave() -> void:
 	var lbl: Label = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/InfoLabel

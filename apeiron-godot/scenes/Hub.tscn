@@ -429,12 +429,6 @@ text = "Mejoras"
 [node name="PointsLabel" type="Label" parent="ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer"]
 layout_mode = 2
 
-[node name="ShipUpgradesContainer" type="VBoxContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer"]
-layout_mode = 2
-
-[node name="Button" type="Button" parent="ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/ShipUpgradesContainer"]
-layout_mode = 2
-
 [node name="PanelContainer" type="PanelContainer" parent="ContenedorBotones"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_hnc56")
@@ -589,6 +583,7 @@ mouse_default_cursor_shape = 3
 script = ExtResource("7_hnc56")
 
 [node name="Overlay" type="TextureRect" parent="PanelMejoras"]
+visible = false
 z_index = 1
 texture_filter = 1
 texture_repeat = 1
