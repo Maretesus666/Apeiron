@@ -31,6 +31,7 @@ shape = SubResource("CircleShape2D_y38cv")
 position = Vector2(47, 0)
 
 [node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("jugador")]
+zoom = Vector2(0.2, 0.2)
 limit_smoothed = true
 position_smoothing_speed = 1.0
 rotation_smoothing_speed = 1.0

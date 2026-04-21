@@ -95,7 +95,7 @@ func _handle_rotation(delta: float) -> void:
 			return
 		target_angle = _mobile.joy_angle
 	else:
-		target_angle = global_position.angle_to_point(get_global_mouse_position()) + PI
+		target_angle = global_position.angle_to_point(get_global_mouse_position())
 	
 	# Usar rotation_speed con mejoras
 	rotation = lerp_angle(rotation, target_angle, rotation_speed * delta)
