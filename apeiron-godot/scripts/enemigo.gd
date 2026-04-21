@@ -19,6 +19,11 @@ extends Area2D
 @export var rot_min_speed: float       = 80.0
 @export var ram_distance: float        = 200.0
 
+# Nuevos parámetros para evitar cruzarse delante del jugador
+@export var front_avoid_distance: float = 400.0  # Distancia para detectar estar "delante"
+@export var front_avoid_angle: float    = 45.0   # Ángulo en grados para considerar "delante"
+@export var side_approach_bias: float   = 1.5    # Multiplicador para preferir aproximación lateral
+
 var player: Node2D    = null
 var velocity: Vector2 = Vector2.ZERO
 
@@ -31,10 +36,7 @@ const HISTORY_SIZE := 4
 
 var _damage_cooldown: float = 0.0
 
-# ── Velocidad dinámica ────────────────────────────────────────────────────────
-# Cada enemigo elige su ventaja entre 5% y 10% al nacer y la mantiene.
-# Así no todos tienen exactamente el mismo bonus 
-var _speed_advantage: float = 1.0   # multiplicador sobre la velocidad del jugador
+var _speed_advantage: float = 1.0
 
 func _ready() -> void:
 	add_to_group("enemies")
@@ -42,38 +44,26 @@ func _ready() -> void:
 	area_entered.connect(_on_area_entered)
 	player = get_tree().get_first_node_in_group("player")
 	_wobble_phase    = randf_range(0.0, TAU)
-	_speed_advantage = randf_range(1.05, 1.10)   # 5-10 % más rápido que el jugador
+	_speed_advantage = randf_range(1.05, 1.10)
 	set_meta("max_health", health)
 
-# ── Velocidad efectiva basada en el estado actual del jugador ─────────────────
-# Referencia = max(velocidad actual del jugador, 40 % de su velocidad máxima).
-# Esto evita que el enemigo quede estático cuando el jugador frena.
-# También suma la aceleración estimada del jugador para anticiparse.
 func _get_dynamic_max_speed() -> float:
 	if not player or not is_instance_valid(player):
-		return max_speed   # fallback al valor exportado
+		return max_speed
 
 	var player_max: float = player.max_speed if "max_speed" in player else 6000.0
 	var player_cur: float = player.velocity.length()
 
-	# Anticipa cuánto puede acelerar el jugador en el próximo instante
 	var player_accel: float = player.thrust_acceleration if "thrust_acceleration" in player else 6000.0
-	# Estimación conservadora: 0.1 s de aceleración
 	var projected_speed: float = player_cur + player_accel * 0.1
 
-	# Referencia: proyección pero sin exceder el máximo del jugador
 	var reference: float = minf(projected_speed, player_max)
-
-	# Piso: al menos 20 % del max para no quedarse parado cuando el jugador frena
 	reference = maxf(reference, player_max * 0.2)
 
 	return reference * _speed_advantage
 
 func _get_dynamic_accel() -> float:
-	# La aceleración debe ser suficiente para alcanzar max_speed 
 	return _get_dynamic_max_speed() * 1.5
-
-# ─────────────────────────────────────────────────────────────────────────────
 
 func _physics_process(delta: float) -> void:
 	if _damage_cooldown > 0.0:
@@ -89,7 +79,6 @@ func _physics_process(delta: float) -> void:
 
 	_check_player_proximity(delta)
 
-	# Usar velocidad/aceleración dinámicas
 	var dyn_max_speed: float = _get_dynamic_max_speed()
 	var dyn_accel:     float = _get_dynamic_accel()
 
@@ -129,7 +118,27 @@ func _compute_direction(delta: float) -> Vector2:
 	else:
 		target_pos = _solve_intercept(player_vel)
 
+	# NUEVO: Detectar si estamos delante del jugador
+	var to_enemy := (global_position - player.global_position).normalized()
+	var player_forward := player_vel.normalized() if player_vel.length() > 50 else Vector2.RIGHT.rotated(player.rotation)
+	
+	var dot_product := to_enemy.dot(player_forward)
+	var is_in_front := dot_product > cos(deg_to_rad(front_avoid_angle)) and dist < front_avoid_distance
+	
 	var chase_dir := (target_pos - global_position).normalized()
+	
+	# Si estamos delante del jugador, preferir moverse hacia los lados
+	if is_in_front:
+		# Obtener dirección perpendicular a la velocidad del jugador
+		var perpendicular := Vector2(-player_forward.y, player_forward.x)
+		
+		# Decidir qué lado es mejor (el que nos acerca más al jugador desde el costado)
+		var to_player := (player.global_position - global_position)
+		var side_sign := 1.0 # o -1.0 guardado como variable del enemigo
+		
+		# Mezclar dirección de persecución con movimiento lateral
+		var lateral_dir := perpendicular * side_sign
+		chase_dir = chase_dir.lerp(lateral_dir, side_approach_bias).normalized()
 
 	_wobble_phase += delta * wobble_frequency * TAU
 	var wobble_scale := clampf(dist / 800.0, 0.0, 1.0)

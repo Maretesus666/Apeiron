@@ -7,7 +7,7 @@ extends CharacterBody2D
 @export var damping: float                   = 0
 @export var base_rotation_speed: float       = 8.0
 @export var base_fire_rate: float            = 0.2
-@export var base_max_health: int             = 5
+@export var base_max_health: int             = 50
 
 @export var shoot_shake_amount: float    = 2.0
 @export var shoot_shake_duration: float  = 0.08

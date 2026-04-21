@@ -39,6 +39,9 @@ func _show_pause() -> void:
 	get_tree().paused     = true
 	if _mobile:
 		_mobile.enabled = false
+	
+	# Panel normal para pausa
+	_set_panel_style(false)
 
 func show_mission_complete(reward: int) -> void:
 	is_game_over        = true
@@ -50,6 +53,9 @@ func show_mission_complete(reward: int) -> void:
 	get_tree().paused     = true
 	if _mobile:
 		_mobile.enabled = false
+	
+	# Panel transparente para victoria
+	_set_panel_style(true)
 
 func show_game_over_menu(score: int = 0) -> void:
 	is_game_over         = true
@@ -67,6 +73,31 @@ func show_game_over_menu(score: int = 0) -> void:
 	get_tree().paused     = true
 	if _mobile:
 		_mobile.enabled = false
+	
+	# Panel transparente para game over
+	_set_panel_style(true)
+
+func _set_panel_style(transparent: bool) -> void:
+	# Si es transparente (game over/victoria), hacer el panel invisible
+	# pero mantener los botones y texto visibles
+	if transparent:
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0, 0, 0, 0)  # Transparente
+		pause_panel.add_theme_stylebox_override("panel", style)
+	else:
+		# Estilo normal para pausa
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0.1, 0.1, 0.1, 0.95)
+		style.border_width_left = 3
+		style.border_width_top = 3
+		style.border_width_right = 3
+		style.border_width_bottom = 3
+		style.border_color = Color(0.3, 0.3, 0.3, 0.8)
+		style.corner_radius_top_left = 10
+		style.corner_radius_top_right = 10
+		style.corner_radius_bottom_left = 10
+		style.corner_radius_bottom_right = 10
+		pause_panel.add_theme_stylebox_override("panel", style)
 
 func hide_menu() -> void:
 	pause_panel.visible = false

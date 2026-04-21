@@ -11,6 +11,7 @@ var was_scrolling: bool = false
 var button_tween: Tween = null
 
 const FONT := preload("res://assets/fonts/ultrakill.ttf")
+const OpcionesScene := preload("res://scripts/opciones.gd")
 
 # Panel de apuesta
 var bet_panel: Control = null
@@ -40,6 +41,58 @@ func _ready():
 	)
 	
 	_build_bet_panel()
+	_build_hamburger_menu()
+
+func _build_hamburger_menu() -> void:
+	# Botón hamburguesa en la esquina superior derecha
+	var menu_btn := Button.new()
+	menu_btn.text = "☰"
+	menu_btn.custom_minimum_size = Vector2(60, 60)
+	menu_btn.add_theme_font_override("font", FONT)
+	menu_btn.add_theme_font_size_override("font_size", 42)
+	menu_btn.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+	
+	# Posición en esquina superior derecha
+	menu_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	menu_btn.position = Vector2(-680, 20)
+	
+	# Estilo
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.1, 0.1, 0.7)
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(0.4, 0.4, 0.4, 0.8)
+	menu_btn.add_theme_stylebox_override("normal", style)
+	
+	var style_hover := StyleBoxFlat.new()
+	style_hover.bg_color = Color(0.15, 0.15, 0.15, 0.9)
+	style_hover.corner_radius_top_left = 8
+	style_hover.corner_radius_top_right = 8
+	style_hover.corner_radius_bottom_left = 8
+	style_hover.corner_radius_bottom_right = 8
+	style_hover.border_width_left = 2
+	style_hover.border_width_top = 2
+	style_hover.border_width_right = 2
+	style_hover.border_width_bottom = 2
+	style_hover.border_color = Color(0.6, 0.6, 0.6, 1.0)
+	menu_btn.add_theme_stylebox_override("hover", style_hover)
+	
+	menu_btn.pressed.connect(_on_menu_button_pressed)
+	add_child(menu_btn)
+
+func _on_menu_button_pressed() -> void:
+	# Abrir menú de opciones
+	var opciones := Control.new()
+	opciones.set_script(OpcionesScene)
+	opciones.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(opciones)
+	opciones.closed.connect(func(): pass)
 
 func _mejorar_info_label() -> void:
 	var info_label: Label = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer/InfoLabel
@@ -139,8 +192,6 @@ func _aplicar_estilo_boton(btn: Button, tipo: String) -> void:
 func _actualizar_stats_nave() -> void:
 	var container: VBoxContainer = $ContenedorBotones/ScrollContainer/HBoxContainer/Nave/VBoxContainer
 	
-	# ── FIX: sacar del árbol primero para que queue_free no deje un nodo
-	# "fantasma" con el mismo nombre bloqueando la búsqueda del siguiente frame ──
 	var stats_container = container.get_node_or_null("StatsContainer")
 	if stats_container:
 		container.remove_child(stats_container)

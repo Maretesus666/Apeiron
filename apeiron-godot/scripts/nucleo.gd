@@ -5,12 +5,13 @@ signal mejoras_solicitadas(tipo: String)
 # — Config —
 @export var rotation_speed: float = 0.3        
 @export var click_scale_amount: float = 0.88    
-@export var base_points_per_click: int = 1
+@export var base_points_per_click: int = 1000 
 
 # — Nodos creados en código —
 var nucleo_sprite: TextureRect
 var points_label: Label
 var auto_click_timer: float = 0.0
+var last_click_pos: Vector2 = Vector2.ZERO
 
 func _ready() -> void:
 	_build_ui()
@@ -69,6 +70,7 @@ func _build_ui() -> void:
 	btn.add_theme_stylebox_override("focus", empty)
 	btn.add_theme_stylebox_override("disabled", empty)
 	btn.pressed.connect(_on_nucleo_clicked)
+	btn.gui_input.connect(_on_nucleo_input)
 	pivot.add_child(btn)
 
 	# — Label "clickeame" debajo —
@@ -86,6 +88,13 @@ func _build_ui() -> void:
 	btn_mejoras.add_theme_font_size_override("font_size", 30) 
 	vbox.add_child(btn_mejoras)
 	btn_mejoras.pressed.connect(func(): mejoras_solicitadas.emit("nucleo"))
+
+func _on_nucleo_input(event: InputEvent) -> void:
+	# Capturar posición del click
+	if event is InputEventMouseButton and event.pressed:
+		last_click_pos = event.global_position
+	elif event is InputEventScreenTouch and event.pressed:
+		last_click_pos = event.position
 	
 func _process(delta: float) -> void:
 	# Rotación lenta
@@ -99,16 +108,16 @@ func _process(delta: float) -> void:
 		auto_click_timer += delta
 		if auto_click_timer >= 1.0 / auto_speed:
 			auto_click_timer = 0.0
-			_add_points(false)
+			_add_points(false, 0)
 
 func _on_nucleo_clicked() -> void:
 	# Bulk clicks
 	var bulk := int(UpgradeManager.get_clicker_stat("bulk_clicks"))
 	var times := 1 + bulk
 	
-	# Dispersar los números sin delay (más fluido)
+	# Dispersar los números en círculo alrededor del click
 	for i in times:
-		_add_points(true, i)  # Pasar el índice para dispersión
+		_add_points(true, i)
 	
 	_animate_click()
 
@@ -153,7 +162,7 @@ func _spawn_float_label(value: int, offset_index: int = 0) -> void:
 	var lbl := Label.new()
 	lbl.text = "+%d" % value
 	lbl.add_theme_font_override("font", load("res://assets/fonts/ultrakill.ttf"))
-	lbl.add_theme_font_size_override("font_size", 42)  # Tamaño uniforme para todos
+	lbl.add_theme_font_size_override("font_size", 42)
 	
 	# Color RGB cíclico basado en el valor
 	var color := _get_value_color(value)
@@ -163,17 +172,20 @@ func _spawn_float_label(value: int, offset_index: int = 0) -> void:
 	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
 	lbl.add_theme_constant_override("outline_size", 4)
 	
-	# Posición MUY cercana al núcleo (rango ultra restrictivo)
-	# Dispersión extra para clicks múltiples usando offset_index
-	var dispersion_x := 12.0 + (offset_index * 3.0)  # Más dispersión con cada click
-	var dispersion_y := 8.0 + (offset_index * 2.0)
+	# Posición en radio de 10 píxeles del último click
+	# Para clicks múltiples, distribuir en círculo
+	var angle := (TAU / maxf(1, UpgradeManager.get_clicker_stat("bulk_clicks") + 1)) * offset_index
+	var radius := 50.0
+	var offset := Vector2(cos(angle), sin(angle)) * radius
 	
-	var center_pos := nucleo_sprite.global_position + nucleo_sprite.size / 2.0
-	center_pos += Vector2(
-		randf_range(-dispersion_x, dispersion_x),
-		randf_range(-dispersion_y, dispersion_y)
-	)
-	lbl.global_position = center_pos
+	# Usar posición del último click si está disponible, sino centro del sprite
+	var base_pos: Vector2
+	if last_click_pos != Vector2.ZERO:
+		base_pos = last_click_pos
+	else:
+		base_pos = nucleo_sprite.global_position + nucleo_sprite.size / 2.0
+	
+	lbl.global_position = base_pos + offset
 	
 	get_tree().root.add_child(lbl)
 	
@@ -188,30 +200,13 @@ func _spawn_float_label(value: int, offset_index: int = 0) -> void:
 	tw.chain().tween_callback(lbl.queue_free)
 
 # Genera un color RGB cíclico basado en el valor
-# Cambio rápido al inicio (1-100), cambio lento después (100-10000)
 func _get_value_color(value: int) -> Color:
-	# Ciclo del 1 al 10000, luego se reinicia
 	var position_in_cycle := fmod(float(value - 1), 10000.0) + 1.0
-	
-	# Usar raíz cuadrada para que los valores bajos cambien rápido
-	# y los valores altos cambien lento
-	# sqrt(1) = 1, sqrt(100) = 10, sqrt(10000) = 100
 	var sqrt_value := sqrt(position_in_cycle)
-	var sqrt_max := sqrt(10000.0)  # = 100
-	
-	# Normalizar de 0 a 1 usando la raíz cuadrada
+	var sqrt_max := sqrt(10000.0)
 	var hue := sqrt_value / sqrt_max
-	
-	# El hue va de 0 a 1 (un ciclo completo de colores)
-	# Valores bajos (1-100): cambian del 0.1 al 0.32 = cambio rápido visible
-	# Valores medios (100-2500): cambian del 0.32 al 0.5 = cambio moderado
-	# Valores altos (2500-10000): cambian del 0.5 al 1.0 = cambio lento
-	
-	# Saturación y brillo al máximo para colores vibrantes
 	var saturation := 1.0
 	var value_brightness := 1.0
-	
-	# Convertir HSV a RGB
 	return Color.from_hsv(hue, saturation, value_brightness)
 
 func _on_points_changed(new_points: int) -> void:
