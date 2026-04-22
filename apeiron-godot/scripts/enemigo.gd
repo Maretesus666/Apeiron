@@ -8,8 +8,6 @@ extends Area2D
 
 @export var max_predict_time: float    = 1.0
 @export var fallback_predict_time: float = 0.35
-@export var wobble_strength: float     = 0.06
-@export var wobble_frequency: float    = 1.8
 @export var separation_radius: float   = 130.0
 @export var separation_weight: float   = 0.45
 @export var rage_speed_mult: float     = 1.1
@@ -19,15 +17,14 @@ extends Area2D
 @export var rot_min_speed: float       = 80.0
 @export var ram_distance: float        = 200.0
 
-# Nuevos parámetros para evitar cruzarse delante del jugador
-@export var front_avoid_distance: float = 400.0  # Distancia para detectar estar "delante"
-@export var front_avoid_angle: float    = 45.0   # Ángulo en grados para considerar "delante"
-@export var side_approach_bias: float   = 1.5    # Multiplicador para preferir aproximación lateral
+# Sistema de flanqueo mejorado
+@export var flank_distance: float      = 60.0   # Distancia ideal de flanqueo
+@export var flank_angle_range: float   = 120.0   # Rango de ángulos para flanqueo (grados)
+@export var circle_radius: float       = -4.0   # Radio para orbitar al jugador
 
 var player: Node2D    = null
 var velocity: Vector2 = Vector2.ZERO
 
-var _wobble_phase: float = 0.0
 var _angular_vel:  float = 0.0
 var _is_enraged:   bool  = false
 
@@ -35,16 +32,18 @@ var _player_vel_history: Array[Vector2] = []
 const HISTORY_SIZE := 4
 
 var _damage_cooldown: float = 0.0
-
 var _speed_advantage: float = 1.0
+var _flank_side: int = 1  # 1 o -1, determina hacia qué lado flanquea
+var _target_angle: float = 0.0  # Ángulo objetivo alrededor del jugador
 
 func _ready() -> void:
 	add_to_group("enemies")
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
 	player = get_tree().get_first_node_in_group("player")
-	_wobble_phase    = randf_range(0.0, TAU)
 	_speed_advantage = randf_range(1.05, 1.10)
+	_flank_side = 1 if randf() > 0.5 else -1
+	_target_angle = randf() * TAU  # Ángulo inicial aleatorio
 	set_meta("max_health", health)
 
 func _get_dynamic_max_speed() -> float:
@@ -76,7 +75,6 @@ func _physics_process(delta: float) -> void:
 
 	_update_rage()
 	_update_player_history()
-
 	_check_player_proximity(delta)
 
 	var dyn_max_speed: float = _get_dynamic_max_speed()
@@ -109,80 +107,43 @@ func _check_player_proximity(delta: float) -> void:
 		die()
 
 func _compute_direction(delta: float) -> Vector2:
-	var player_vel := _get_player_velocity()
-	var dist       := global_position.distance_to(player.global_position)
-
-	var target_pos: Vector2
+	var to_player := player.global_position - global_position
+	var dist := to_player.length()
+	
+	# Si estamos muy cerca, ir directo al jugador (ram)
 	if dist < ram_distance:
-		target_pos = player.global_position
-	else:
-		target_pos = _solve_intercept(player_vel)
-
-	# NUEVO: Detectar si estamos delante del jugador
-	var to_enemy := (global_position - player.global_position).normalized()
-	var player_forward := player_vel.normalized() if player_vel.length() > 50 else Vector2.RIGHT.rotated(player.rotation)
+		return to_player.normalized()
 	
-	var dot_product := to_enemy.dot(player_forward)
-	var is_in_front := dot_product > cos(deg_to_rad(front_avoid_angle)) and dist < front_avoid_distance
+	# NUEVO SISTEMA: Flanqueo circular
+	# Calcular posición objetivo en un círculo alrededor del jugador
 	
+	# Actualizar ángulo objetivo para orbitar
+	var orbit_speed := 0.8  # Velocidad de rotación alrededor del jugador
+	_target_angle += orbit_speed * delta * _flank_side
+	
+	# Calcular posición objetivo
+	var offset := Vector2(cos(_target_angle), sin(_target_angle)) * circle_radius
+	var target_pos := player.global_position + offset
+	
+	# Predecir movimiento del jugador
+	var player_vel := _get_player_velocity()
+	if player_vel.length() > 100:
+		target_pos += player_vel * 0.3
+	
+	# Dirección hacia la posición objetivo
 	var chase_dir := (target_pos - global_position).normalized()
 	
-	# Si estamos delante del jugador, preferir moverse hacia los lados
-	if is_in_front:
-		# Obtener dirección perpendicular a la velocidad del jugador
-		var perpendicular := Vector2(-player_forward.y, player_forward.x)
-		
-		# Decidir qué lado es mejor (el que nos acerca más al jugador desde el costado)
-		var to_player := (player.global_position - global_position)
-		var side_sign := 1.0 # o -1.0 guardado como variable del enemigo
-		
-		# Mezclar dirección de persecución con movimiento lateral
-		var lateral_dir := perpendicular * side_sign
-		chase_dir = chase_dir.lerp(lateral_dir, side_approach_bias).normalized()
-
-	_wobble_phase += delta * wobble_frequency * TAU
-	var wobble_scale := clampf(dist / 800.0, 0.0, 1.0)
-	chase_dir = chase_dir.rotated(sin(_wobble_phase) * wobble_strength * wobble_scale)
-
+	# Si estamos lejos, acercarse más directamente
+	if dist > flank_distance * 1.5:
+		var direct_weight := clampf((dist - flank_distance * 1.5) / 500.0, 0.0, 0.7)
+		chase_dir = chase_dir.lerp(to_player.normalized(), direct_weight)
+	
+	# Separación de otros enemigos
 	var sep_dir := _compute_separation()
 	if sep_dir.length() > 0.001:
 		chase_dir = chase_dir.lerp(sep_dir, separation_weight).normalized()
-
+	
 	return chase_dir
-
-func _solve_intercept(player_vel: Vector2) -> Vector2:
-	var eff_speed: float    = _get_dynamic_max_speed() * (rage_speed_mult if _is_enraged else 1.0)
-	var solver_speed: float = lerp(velocity.length(), eff_speed, 0.6)
-	solver_speed = maxf(solver_speed, eff_speed * 0.4)
-
-	var w: Vector2 = player.global_position - global_position
-	var a: float   = player_vel.dot(player_vel) - solver_speed * solver_speed
-	var b: float   = 2.0 * w.dot(player_vel)
-	var c: float   = w.dot(w)
-	var t: float   = -1.0
-
-	if absf(a) < 0.5:
-		if absf(b) > 0.5:
-			t = -c / b
-	else:
-		var disc: float = b * b - 4.0 * a * c
-		if disc >= 0.0:
-			var sq := sqrt(disc)
-			var t1 := (-b - sq) / (2.0 * a)
-			var t2 := (-b + sq) / (2.0 * a)
-			if t1 > 0.001 and t2 > 0.001:
-				t = minf(t1, t2)
-			elif t1 > 0.001:
-				t = t1
-			elif t2 > 0.001:
-				t = t2
-
-	if t > 0.001:
-		var accel_est := _estimate_player_accel()
-		t = minf(t, max_predict_time)
-		return player.global_position + player_vel * t + accel_est * 0.5 * t * t
-	else:
-		return player.global_position + player_vel * fallback_predict_time
 
 func _update_player_history() -> void:
 	_player_vel_history.push_back(_get_player_velocity())
@@ -195,11 +156,6 @@ func _get_player_velocity() -> Vector2:
 	if player.has_method("get_velocity"):
 		return player.get_velocity()
 	return Vector2.ZERO
-
-func _estimate_player_accel() -> Vector2:
-	if _player_vel_history.size() < 2:
-		return Vector2.ZERO
-	return (_player_vel_history[-1] - _player_vel_history[0]) * 0.3
 
 func _compute_separation() -> Vector2:
 	var sep   := Vector2.ZERO

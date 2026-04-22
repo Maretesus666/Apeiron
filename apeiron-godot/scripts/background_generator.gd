@@ -1,17 +1,20 @@
 extends Node2D
 
-@export var star_count: int = 200
-@export var star_speed_min: float = 10.0
-@export var star_speed_max: float = 50.0
+@export var star_count: int = 300
+@export var star_speed_min: float = 1.0
+@export var star_speed_max: float = 500000.0
 @export var star_size_min: float = 1.0
 @export var star_size_max: float = 3.0
 @export var spawn_distance: float = 1000.0
 
 var stars: Array = []
 var player: Node2D = null
+var camera: Camera2D = null
 
 func _ready():
 	player = get_tree().get_first_node_in_group("player")
+	if player and player.has_node("Camera2D"):
+		camera = player.get_node("Camera2D")
 	generate_initial_stars()
 
 func _process(delta):
@@ -69,10 +72,18 @@ func create_star_texture(size: float) -> ImageTexture:
 	return ImageTexture.create_from_image(img)
 
 func update_stars(delta):
+	var cam_zoom := Vector2.ONE
+	if camera:
+		cam_zoom = camera.zoom
+	
 	if not player:
 		return
+	 
 	
 	for star in stars:
+		var sprite = star.get_child(0) as Sprite2D
+		if sprite:
+				sprite.scale = Vector2.ONE / cam_zoom
 		if not is_instance_valid(star):
 			continue
 		
@@ -80,18 +91,30 @@ func update_stars(delta):
 		var speed = star.get_meta("speed")
 		var parallax_factor = speed / star_speed_max
 		
+		# Ajustar movimiento según el zoom de la cámara
+		# Cuando la cámara hace zoom out, las estrellas se mueven más rápido visualmente
+		 
+		
 		# Calcular movimiento relativo al jugador
 		var offset = player.velocity * delta * parallax_factor * 0.1
 		star.global_position -= offset
+	
 
 func spawn_new_stars():
 	if not player:
 		return
 	
+	# Ajustar distancia de spawn según zoom
+	var effective_spawn_distance := spawn_distance
+	if camera and camera.has_method("get_current_zoom"):
+		var zoom_factor = camera.get_current_zoom()
+		# Cuando zoom es menor (más alejado), necesitamos más distancia
+		effective_spawn_distance = spawn_distance / (zoom_factor * 2.0)
+	
 	# Spawn estrellas en los bordes de la pantalla
 	while stars.size() < star_count:
 		var angle = randf() * TAU
-		var distance = spawn_distance
+		var distance = effective_spawn_distance
 		var offset = Vector2(cos(angle), sin(angle)) * distance
 		var spawn_pos = player.global_position + offset
 		
@@ -103,6 +126,11 @@ func remove_distant_stars():
 	if not player:
 		return
 	
+	var effective_spawn_distance := spawn_distance
+	if camera and camera.has_method("get_current_zoom"):
+		var zoom_factor = camera.get_current_zoom()
+		effective_spawn_distance = spawn_distance / (zoom_factor * 2.0)
+	
 	var to_remove = []
 	
 	for star in stars:
@@ -111,7 +139,7 @@ func remove_distant_stars():
 			continue
 		
 		var distance = star.global_position.distance_to(player.global_position)
-		if distance > spawn_distance * 1.5:
+		if distance > effective_spawn_distance * 1.5:
 			to_remove.append(star)
 	
 	for star in to_remove:

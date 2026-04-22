@@ -12,6 +12,7 @@ extends Control
 @export var border_width: float = 2.0
 
 var player: Node2D = null
+var camera: Camera2D = null
 
 func _ready():
 	custom_minimum_size = minimap_size
@@ -22,6 +23,8 @@ func _ready():
 	)
 	await get_tree().process_frame
 	player = get_tree().get_first_node_in_group("player")
+	if player and player.has_node("Camera2D"):
+		camera = player.get_node("Camera2D")
 
 func _draw():
 	# Fondo con bordes redondeados simulados
@@ -36,11 +39,18 @@ func _draw():
 	if not player or not is_instance_valid(player):
 		return
 
+	# Ajustar escala del minimapa según el zoom de la cámara
+	var effective_scale := world_scale
+	if camera and camera.has_method("get_current_zoom"):
+		var zoom_factor = camera.get_current_zoom()
+		# Cuando la cámara hace zoom out, el minimapa muestra más área
+		effective_scale = world_scale * (zoom_factor / 0.2)
+
 	# Enemigos
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		if not is_instance_valid(enemy):
 			continue
-		var rel = (enemy.global_position - player.global_position) * world_scale
+		var rel = (enemy.global_position - player.global_position) * effective_scale
 		var mpos = center + rel
 		if Rect2(Vector2.ZERO, minimap_size).has_point(mpos):
 			draw_circle(mpos, enemy_size, enemy_color)
@@ -51,7 +61,7 @@ func _draw():
 	for obj in get_tree().get_nodes_in_group("objective"):
 		if not is_instance_valid(obj):
 			continue
-		var rel = (obj.global_position - player.global_position) * world_scale
+		var rel = (obj.global_position - player.global_position) * effective_scale
 		var mpos = center + rel
 
 		# Si está fuera del minimapa, dibujar flecha en el borde
@@ -132,4 +142,10 @@ func _process(_delta):
 func world_to_minimap(world_pos: Vector2) -> Vector2:
 	if not player:
 		return Vector2.ZERO
-	return minimap_size / 2 + (world_pos - player.global_position) * world_scale
+	
+	var effective_scale := world_scale
+	if camera and camera.has_method("get_current_zoom"):
+		var zoom_factor = camera.get_current_zoom()
+		effective_scale = world_scale * (zoom_factor / 0.2)
+	
+	return minimap_size / 2 + (world_pos - player.global_position) * effective_scale
