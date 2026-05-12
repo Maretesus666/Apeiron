@@ -1,17 +1,16 @@
 extends Node2D
 
 @export var enemy_scene = preload("res://scenes/enemigo.tscn")
-@export var min_spawn_interval: float = 3.0   # Mínimo tiempo entre spawns
-@export var max_spawn_interval: float = 8.0  # Máximo tiempo entre spawns
-@export var min_distance: float = 2000.0
-@export var max_distance: float = 3500.0
-@export var max_enemies: int = 30  # Reducido de 15
+@export var min_spawn_interval: float = 0.0   # Mínimo tiempo entre spawns
+@export var max_spawn_interval: float = 3.0  # Máximo tiempo entre spawns
+@export var min_distance: float = 10000.0
+@export var max_distance: float = 35000.0
+@export var max_enemies: int = 100 
 @export var min_enemies_per_group: int = 3
 @export var max_enemies_per_group: int = 5
 
 enum SpawnPattern {
 	RANDOM,      # Posiciones aleatorias
-	CIRCLE,      # Círculo alrededor del jugador
 	WAVE,        # Oleadas desde un lado
 	CORNERS,     # Desde las esquinas
 	FORMATION    # Formación en V o línea
@@ -60,8 +59,6 @@ func spawn_wave():
 	match spawn_pattern:
 		SpawnPattern.RANDOM:
 			spawn_random_pattern(enemies_to_spawn)
-		SpawnPattern.CIRCLE:
-			spawn_circle_pattern(enemies_to_spawn)
 		SpawnPattern.WAVE:
 			spawn_wave_pattern(enemies_to_spawn)
 		SpawnPattern.CORNERS:

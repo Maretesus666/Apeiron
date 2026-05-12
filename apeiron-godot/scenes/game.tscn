@@ -83,6 +83,7 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("7_u5sy4")
 
 [node name="Minimap" type="Control" parent="HUD"]
+visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0

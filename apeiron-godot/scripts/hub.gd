@@ -47,14 +47,14 @@ func _build_hamburger_menu() -> void:
 	# Botón hamburguesa en la esquina superior derecha
 	var menu_btn := Button.new()
 	menu_btn.text = "☰"
-	menu_btn.custom_minimum_size = Vector2(60, 60)
+	menu_btn.custom_minimum_size = Vector2(60, 30)
 	menu_btn.add_theme_font_override("font", FONT)
-	menu_btn.add_theme_font_size_override("font_size", 42)
+	menu_btn.add_theme_font_size_override("font_size", 40)
 	menu_btn.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
 	
 	# Posición en esquina superior derecha
 	menu_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	menu_btn.position = Vector2(-680, 20)
+	menu_btn.position = Vector2(-1000, 10)
 	
 	# Estilo
 	var style := StyleBoxFlat.new()
