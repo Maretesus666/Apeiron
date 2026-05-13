@@ -42,7 +42,19 @@ func _ready() -> void:
 		_on_combo_changed(ScoreManager.combo)
 
 	ConfigManager.connect("mobile_controls_changed", func(_v): _build_fps_label())
-
+	$HealthContainer.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	$HealthContainer.offset_left = 10
+	$HealthContainer.offset_top = 30
+	
+	$ScoreContainer.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	$ScoreContainer.offset_left = 10
+	$ScoreContainer.offset_top = 54
+	
+	# Speed HUD debe adaptarse al tamaño de viewport
+	var vp := get_viewport().get_visible_rect().size
+	speed_container.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	speed_container.offset_left = 24
+	speed_container.offset_bottom = -110
 func _setup_existing_labels() -> void:
 	$HealthContainer.position = Vector2(10, 30)
 	$ScoreContainer.position  = Vector2(10, 54)

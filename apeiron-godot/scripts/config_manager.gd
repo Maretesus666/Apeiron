@@ -14,6 +14,10 @@ signal mobile_controls_changed(enabled: bool)
 const SAVE_PATH := "user://config.save"
 
 func _ready() -> void:
+	# Detectar plataforma móvil automáticamente
+	var os_name := OS.get_name()
+	if os_name == "Android" or os_name == "iOS":
+		mobile_controls_enabled = true
 	_load()
 	_apply_all()
 

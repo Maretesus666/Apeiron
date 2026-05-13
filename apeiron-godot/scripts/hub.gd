@@ -23,8 +23,7 @@ func _ready():
 	await get_tree().process_frame
 	await get_tree().process_frame
 	page_width = scroller.get_child(0).get_child(0).size.x
-	scroller.scroll_horizontal = 0
-	
+	scroller.scroll_horizontal = 0  
 	var nucleo := $ContenedorBotones/ScrollContainer/HBoxContainer/nucleo
 	if nucleo.has_signal("mejoras_solicitadas"):
 		nucleo.mejoras_solicitadas.connect(panel_mejoras.abrir)

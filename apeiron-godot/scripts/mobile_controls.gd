@@ -41,8 +41,11 @@ func _ready() -> void:
 	ConfigManager.mobile_controls_changed.connect(func(v: bool): enabled = v)
 
 	var vp: Vector2 = get_viewport().get_visible_rect().size
+	_shoot_btn_r = max(55.0, vp.x * 0.08)  # 8% del ancho, mínimo 55px
 	_shoot_btn_pos = Vector2(vp.x - _shoot_btn_r - 36, vp.y - _shoot_btn_r - 36)
-
+	# Escalar joystick
+	joystick_radius = max(80.0, vp.y * 0.1)  # 10% de altura
+	knob_radius = joystick_radius * 0.45
 	# Zona joystick (mitad izquierda)
 	_joy_zone = Control.new()
 	_joy_zone.position     = Vector2.ZERO

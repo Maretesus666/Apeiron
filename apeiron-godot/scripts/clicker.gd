@@ -44,7 +44,7 @@ func setup_ui():
 		click_area.name = "ClickArea"
 		click_area.custom_minimum_size = Vector2(32, 32)
 		click_area.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-		click_area.texture_normal = load("res://assets/sprites/nave.png")
+		click_area.texture_normal = load("res://assets/sprites/nucleo.png")
 		vbox.add_child(click_area)
 		vbox.move_child(click_area, 2)
 	

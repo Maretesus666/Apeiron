@@ -7,7 +7,7 @@ extends Node2D
 @export var max_distance: float = 35000.0
 @export var max_enemies: int = 100 
 @export var min_enemies_per_group: int = 3
-@export var max_enemies_per_group: int = 5
+@export var max_enemies_per_group: int = 6
 
 enum SpawnPattern {
 	RANDOM,      # Posiciones aleatorias

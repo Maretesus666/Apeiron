@@ -51,7 +51,7 @@ func _build_ui() -> void:
 
 	# TextureRect del núcleo
 	nucleo_sprite = TextureRect.new()
-	nucleo_sprite.texture = load("res://assets/sprites/nave.png")
+	nucleo_sprite.texture = load("res://assets/sprites/nucleo.png")
 	nucleo_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	nucleo_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	nucleo_sprite.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

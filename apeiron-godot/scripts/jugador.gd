@@ -184,6 +184,7 @@ func take_damage(amount: int) -> void:
 	spawn_damage_particles()
 	flash_damage()
 	apply_shake(damage_shake_amount, damage_shake_duration)
+	Input.vibrate_handheld(80)
 	if current_health <= 0:
 		die()
 

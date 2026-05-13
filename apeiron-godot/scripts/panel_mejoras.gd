@@ -3,11 +3,13 @@ extends Control
 @onready var panel: Panel = null
 @onready var overlay: TextureRect = null
 
-const PANEL_WIDTH := 900.0
+const PANEL_WIDTH_DESKTOP := 900.0
+const PANEL_WIDTH_MOBILE := 0.85  # 85% del ancho en móvil
 const FONT := preload("res://assets/fonts/ultrakill.ttf")
 
 var _tween: Tween
 var _tipo_actual := ""
+var _panel_width: float = PANEL_WIDTH_DESKTOP
 var title_lbl: Label
 var puntos_lbl: Label
 var upgrades_container: VBoxContainer
@@ -20,14 +22,26 @@ func _ready() -> void:
 		push_error("Panel o Overlay no encontrado")
 		return
 	
+	# Calcular ancho del panel según plataforma
+	var vp := get_viewport_rect().size
+	if ConfigManager.mobile_controls_enabled:
+		_panel_width = vp.x * PANEL_WIDTH_MOBILE
+	else:
+		_panel_width = PANEL_WIDTH_DESKTOP
+	
 	_build_ui()
 	
+	# Configurar overlay para cerrar al tocar
 	if overlay:
+		overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 		overlay.gui_input.connect(func(e):
 			if e is InputEventMouseButton and e.pressed: 
 				cerrar()
+			elif e is InputEventScreenTouch and e.pressed:
+				cerrar()
 		)
 	
+	# Posicionar panel fuera de la pantalla (derecha)
 	panel.position.x = get_viewport_rect().size.x
 	visible = false
 
@@ -35,8 +49,9 @@ func _build_ui() -> void:
 	if not panel:
 		return
 	
-	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0)
-	panel.size = Vector2(PANEL_WIDTH, get_viewport_rect().size.y)
+	# Usar el ancho calculado
+	panel.custom_minimum_size = Vector2(_panel_width, 0)
+	panel.size = Vector2(_panel_width, get_viewport_rect().size.y)
 	
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.06, 0.08, 0.12, 0.98)
@@ -51,6 +66,7 @@ func _build_ui() -> void:
 	if overlay:
 		overlay.modulate = Color(0, 0, 0, 0.75)
 	
+	# Limpiar contenido anterior
 	for child in panel.get_children():
 		child.queue_free()
 	
@@ -59,10 +75,7 @@ func _build_ui() -> void:
 	margin.add_theme_constant_override("margin_right", 30)
 	margin.add_theme_constant_override("margin_top", 30)
 	margin.add_theme_constant_override("margin_bottom", 30)
-	margin.anchor_left = 0.0
-	margin.anchor_top = 0.0
-	margin.anchor_right = 1.0
-	margin.anchor_bottom = 1.0
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	panel.add_child(margin)
 	
 	var vbox := VBoxContainer.new()
@@ -73,13 +86,15 @@ func _build_ui() -> void:
 	header.add_theme_constant_override("separation", 12)
 	vbox.add_child(header)
 	
+	# Botón cerrar
 	var close_btn := Button.new()
 	close_btn.text = "✕ CERRAR"
-	close_btn.custom_minimum_size = Vector2(0, 50)
+	close_btn.custom_minimum_size = Vector2(0, 72)  # Tamaño táctil
 	close_btn.add_theme_font_override("font", FONT)
 	close_btn.add_theme_font_size_override("font_size", 26)
 	close_btn.add_theme_color_override("font_color", Color(1, 0.35, 0.35))
 	close_btn.pressed.connect(cerrar)
+	
 	var close_style := StyleBoxFlat.new()
 	close_style.bg_color = Color(0.25, 0.05, 0.05, 0.6)
 	close_style.corner_radius_top_left = 8
@@ -107,6 +122,7 @@ func _build_ui() -> void:
 	close_btn.add_theme_stylebox_override("hover", close_hover)
 	header.add_child(close_btn)
 	
+	# Título
 	title_lbl = Label.new()
 	title_lbl.add_theme_font_override("font", FONT)
 	title_lbl.add_theme_font_size_override("font_size", 44)
@@ -116,6 +132,7 @@ func _build_ui() -> void:
 	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	header.add_child(title_lbl)
 	
+	# Panel de puntos
 	var puntos_panel := PanelContainer.new()
 	var puntos_style := StyleBoxFlat.new()
 	puntos_style.bg_color = Color(0.15, 0.12, 0.05, 0.6)
@@ -147,6 +164,7 @@ func _build_ui() -> void:
 	puntos_margin.add_child(puntos_lbl)
 	header.add_child(puntos_panel)
 	
+	# Separador
 	var sep := HSeparator.new()
 	sep.add_theme_constant_override("separation", 4)
 	var sep_style := StyleBoxFlat.new()
@@ -154,6 +172,7 @@ func _build_ui() -> void:
 	sep.add_theme_stylebox_override("separator", sep_style)
 	vbox.add_child(sep)
 	
+	# ScrollContainer para las mejoras
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -167,11 +186,14 @@ func abrir(tipo: String) -> void:
 	_tipo_actual = tipo
 	visible = true
 	_poblar()
-	var target_x = get_viewport_rect().size.x - PANEL_WIDTH
+	
+	# Calcular posición objetivo (borde derecho - ancho del panel)
+	var target_x := get_viewport_rect().size.x - _panel_width
 	_animar(target_x)
 
 func cerrar() -> void:
-	var target_x = get_viewport_rect().size.x
+	# Animar hacia fuera de la pantalla (derecha)
+	var target_x := get_viewport_rect().size.x
 	_animar(target_x, true)
 
 func _animar(destino_x: float, ocultar_al_terminar := false) -> void:
@@ -193,6 +215,7 @@ func _poblar() -> void:
 	if not upgrades_container or not title_lbl or not puntos_lbl:
 		return
 	
+	# Limpiar mejoras anteriores
 	for c in upgrades_container.get_children():
 		c.queue_free()
 
@@ -221,7 +244,7 @@ func _poblar() -> void:
 		_agregar_categoria("BONIFICACIONES", 
 			["critical_chance", "critical_multiplier", "combo_bonus"], 
 			"clicker",
-			"Multiplica tus ganancias con efectos especiales")
+			"")
 	else:
 		title_lbl.text = "MEJORAS DE LA NAVE"
 		puntos_lbl.text = "Puntos Clicker: %s" % _format_number(UpgradeManager.clicker_points)
@@ -249,6 +272,7 @@ func _poblar() -> void:
 			"ship",
 			"Mejora supervivencia y evasión")
 
+	# Conectar señales (solo una vez)
 	if not UpgradeManager.clicker_points_changed.is_connected(_on_puntos):
 		UpgradeManager.clicker_points_changed.connect(_on_puntos)
 	if not UpgradeManager.game_points_changed.is_connected(_on_puntos):
@@ -338,11 +362,10 @@ func _crear_boton(id: String, tipo: String) -> PanelContainer:
 	var can_afford: bool = pts >= cost and not is_maxed
 	
 	var panel_container := PanelContainer.new()
-	panel_container.custom_minimum_size = Vector2(0, 95)
+	panel_container.custom_minimum_size = Vector2(0, 110)  # Aumentado para táctil
 	var style := StyleBoxFlat.new()
 	
 	if is_maxed:
-		# Estilo dorado para mejoras al máximo
 		style.bg_color = Color(0.25, 0.18, 0.05, 0.75)
 		style.border_color = Color(1.0, 0.85, 0.2, 0.9)
 	elif can_afford:
@@ -420,7 +443,6 @@ func _crear_boton(id: String, tipo: String) -> PanelContainer:
 	hbox.add_child(cost_vbox)
 	
 	if is_maxed:
-		# Mostrar MAXIMO en lugar del costo
 		var max_label := Label.new()
 		max_label.text = "MAXIMO"
 		max_label.add_theme_font_override("font", FONT)
@@ -459,20 +481,21 @@ func _crear_boton(id: String, tipo: String) -> PanelContainer:
 		
 		if can_afford:
 			var buy_hint := Label.new()
-			buy_hint.text = ">> CLICK PARA COMPRAR"
+			buy_hint.text = ">> TOCA PARA COMPRAR"  # Cambiar texto para móvil
 			buy_hint.add_theme_font_override("font", FONT)
 			buy_hint.add_theme_font_size_override("font_size", 13)
 			buy_hint.add_theme_color_override("font_color", Color(0.4, 0.9, 0.5, 0.7))
 			buy_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			cost_vbox.add_child(buy_hint)
 	
+	# Botón invisible para capturar clicks/toques
 	var btn := Button.new()
 	btn.disabled = not can_afford
 	btn.focus_mode = Control.FOCUS_NONE
+	btn.mouse_filter = Control.MOUSE_FILTER_STOP
 	btn.pressed.connect(func():
 		var ok := UpgradeManager.buy_clicker_upgrade(id) if tipo == "clicker" else UpgradeManager.buy_ship_upgrade(id)
 		if ok: 
-			# Feedback visual instantáneo
 			_button_feedback(panel_container)
 			_poblar()
 	)
@@ -483,10 +506,7 @@ func _crear_boton(id: String, tipo: String) -> PanelContainer:
 	btn.add_theme_stylebox_override("pressed", empty)
 	btn.add_theme_stylebox_override("disabled", empty)
 	
-	btn.anchor_left = 0.0
-	btn.anchor_top = 0.0
-	btn.anchor_right = 1.0
-	btn.anchor_bottom = 1.0
+	btn.set_anchors_preset(Control.PRESET_FULL_RECT)
 	margin.add_child(btn)
 	
 	return panel_container
@@ -500,12 +520,10 @@ func _format_stat(value: float) -> String:
 		return "%.2f" % value
 
 func _button_feedback(btn_panel: PanelContainer) -> void:
-	# Efecto visual muy rápido sin bloquear clicks
 	var original_scale := btn_panel.scale
 	var tw := btn_panel.create_tween()
 	tw.set_parallel(true)
 	tw.set_trans(Tween.TRANS_CUBIC)
 	tw.set_ease(Tween.EASE_OUT)
-	# Pulso rápido
 	tw.tween_property(btn_panel, "scale", original_scale * 0.95, 0.05)
 	tw.chain().tween_property(btn_panel, "scale", original_scale, 0.1)
