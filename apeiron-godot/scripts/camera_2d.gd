@@ -8,7 +8,7 @@ extends Camera2D
 @export_range(1, 10) var smoothing_distance: int = 8
 
 @export_category("Dynamic Zoom")
-@export var zoom_min: float = 0.2  # Zoom cuando va rápido (más alejado)
+@export var zoom_min: float = 0.5  # Zoom cuando va rápido (más alejado)
 @export var zoom_max: float = 1.0  # Zoom cuando va lento (más cerca)
 @export var zoom_speed: float = 1.2  # Velocidad de transición del zoom
 

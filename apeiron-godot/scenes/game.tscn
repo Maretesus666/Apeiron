@@ -28,13 +28,13 @@ layer = -1
 [node name="Fondo" type="ColorRect" parent="FondoGenerado"]
 z_index = -1
 material = SubResource("ShaderMaterial_70w4t")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -172.0
-offset_top = -470.0
-offset_right = 1829.0
-offset_bottom = 462.0
+anchors_preset = -1
+anchor_right = 1.0067708
+anchor_bottom = 1.0051482
+offset_left = -1031.0
+offset_top = -445.0
+offset_right = 970.0
+offset_bottom = 596.43994
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 0
@@ -96,9 +96,10 @@ script = ExtResource("8_vtaks")
 
 [node name="ObjectiveIndicator" type="Control" parent="HUD"]
 layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_right = 1.8210001
+anchor_bottom = 0.77300006
+offset_right = 386.31995
+offset_bottom = -198.16016
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3

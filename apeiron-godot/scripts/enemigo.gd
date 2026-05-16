@@ -217,7 +217,7 @@ func _flash_effect() -> void:
 func _spawn_hit_particles() -> void:
 	_make_particles(
 		global_position, 
-		8, 
+		0, 
 		0.5, 
 		100.0, 
 		220.0, 
@@ -229,7 +229,7 @@ func _spawn_hit_particles() -> void:
 func _spawn_death_particles() -> void:
 	_make_particles(
 		global_position, 
-		22, 
+		0, 
 		0.9, 
 		160.0, 
 		340.0, 

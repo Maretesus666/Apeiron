@@ -1,10 +1,11 @@
-[gd_scene load_steps=26 format=3 uid="uid://c01db0i7tgm2d"]
+[gd_scene load_steps=27 format=3 uid="uid://c01db0i7tgm2d"]
 
 [ext_resource type="Script" uid="uid://dntkixgnexo5x" path="res://scripts/hub.gd" id="1_wi61l"]
 [ext_resource type="Script" uid="uid://nn6rx2sec51g" path="res://scripts/background_generator.gd" id="2_1t77w"]
 [ext_resource type="FontFile" uid="uid://bjkvctpyibltk" path="res://assets/fonts/ultrakill.ttf" id="2_7f5op"]
 [ext_resource type="Shader" uid="uid://cvu8ucill03dy" path="res://shaders/menu.gdshader" id="3_tm630"]
 [ext_resource type="Script" uid="uid://mvfa7t62eqnm" path="res://scripts/nucleo.gd" id="4_tm630"]
+[ext_resource type="Texture2D" uid="uid://dery227j34t2k" path="res://assets/sprites/nucleo (3).png" id="6_48iqm"]
 [ext_resource type="Texture2D" uid="uid://dsqmf3qkp4ovd" path="res://assets/sprites/nave1.png" id="6_tm630"]
 [ext_resource type="Script" uid="uid://di20tn2k2f6ll" path="res://scripts/panel_mejoras.gd" id="7_hnc56"]
 [ext_resource type="Texture2D" uid="uid://dwitc8lgky5im" path="res://assets/sprites/cerrar.png" id="8_6grgh"]
@@ -259,7 +260,7 @@ tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
 "handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(542, -0.25, 0, 0.25, 0),
+"points": PackedFloat32Array(960, -0.25, 0, 0.25, 0),
 "times": PackedFloat32Array(0)
 }
 tracks/5/type = "bezier"
@@ -326,10 +327,8 @@ _data = {
 
 [node name="Hub" type="Control"]
 layout_mode = 3
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -72.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_wi61l")
@@ -362,7 +361,7 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 72.0
+offset_right = 7.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -373,6 +372,7 @@ theme = SubResource("Theme_tm630")
 vertical_scroll_mode = 0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="ContenedorBotones/ScrollContainer"]
+custom_minimum_size = Vector2(3840, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -381,7 +381,7 @@ theme_override_constants/separation = 0
 [node name="nucleo" type="PanelContainer" parent="ContenedorBotones/ScrollContainer/HBoxContainer"]
 custom_minimum_size = Vector2(1080, 0)
 layout_mode = 2
-size_flags_horizontal = 6
+size_flags_horizontal = 3
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_1t77w")
 script = ExtResource("4_tm630")
@@ -437,9 +437,9 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_hnc56")
 layout_mode = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="ContenedorBotones/PanelContainer/Control"]
-custom_minimum_size = Vector2(538, 144)
+custom_minimum_size = Vector2(960, 144)
 layout_mode = 1
-offset_right = 538.0
+offset_right = 960.0
 offset_bottom = 144.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_6grgh")
 
@@ -481,7 +481,7 @@ texture_filter = 2
 texture_repeat = 1
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
-texture = ExtResource("6_tm630")
+texture = ExtResource("6_48iqm")
 expand_mode = 2
 stretch_mode = 5
 
@@ -489,7 +489,7 @@ stretch_mode = 5
 layout_mode = 2
 theme_override_constants/outline_size = 10
 theme_override_fonts/font = ExtResource("2_7f5op")
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 32
 text = "NAVE"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -547,7 +547,7 @@ stretch_mode = 5
 layout_mode = 2
 theme_override_constants/outline_size = 10
 theme_override_fonts/font = ExtResource("2_7f5op")
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 40
 text = "NUCLEO"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -562,7 +562,7 @@ theme_override_styles/hover = SubResource("StyleBoxEmpty_6grgh")
 [node name="AnimationTree" type="AnimationTree" parent="."]
 tree_root = SubResource("AnimationNodeBlendSpace1D_6grgh")
 anim_player = NodePath("../AnimationPlayer")
-parameters/blend_position = 0.0
+parameters/blend_position = 0.9889643
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {

@@ -2,10 +2,10 @@ extends Node2D
 
 @export var enemy_scene = preload("res://scenes/enemigo.tscn")
 @export var min_spawn_interval: float = 0.0   # Mínimo tiempo entre spawns
-@export var max_spawn_interval: float = 3.0  # Máximo tiempo entre spawns
+@export var max_spawn_interval: float = 5.0  # Máximo tiempo entre spawns
 @export var min_distance: float = 10000.0
 @export var max_distance: float = 35000.0
-@export var max_enemies: int = 100 
+@export var max_enemies: int = 30 
 @export var min_enemies_per_group: int = 3
 @export var max_enemies_per_group: int = 6
 

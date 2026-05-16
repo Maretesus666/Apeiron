@@ -53,7 +53,7 @@ func _build_hamburger_menu() -> void:
 	
 	# Posición en esquina superior derecha
 	menu_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	menu_btn.position = Vector2(-1000, 10)
+	menu_btn.position = Vector2(-1920, 10)
 	
 	# Estilo
 	var style := StyleBoxFlat.new()
@@ -412,7 +412,7 @@ func _build_bet_panel() -> void:
 	vbox.add_child(title)
 	
 	var desc := Label.new()
-	desc.text = "Apuesta puntos clicker para multiplicarlos\nSi completas el objetivo: GANAS x2\nSi mueres: PIERDES TODO"
+	desc.text = "Apuesta puntos del nucleo para multiplicarlos\nSi completas el objetivo x2"
 	desc.add_theme_font_override("font", FONT)
 	desc.add_theme_font_size_override("font_size", 18)
 	desc.add_theme_color_override("font_color", Color(0.8, 0.8, 0.9))
@@ -427,7 +427,7 @@ func _build_bet_panel() -> void:
 	vbox.add_child(slider_container)
 	
 	bet_label = Label.new()
-	bet_label.text = "Apuesta: 0 puntos"
+	bet_label.text = "0 puntos"
 	bet_label.add_theme_font_override("font", FONT)
 	bet_label.add_theme_font_size_override("font_size", 28)
 	bet_label.add_theme_color_override("font_color", Color(1, 0.95, 0.3))

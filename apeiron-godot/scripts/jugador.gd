@@ -1,13 +1,13 @@
 extends CharacterBody2D
 
-@export var base_thrust_acceleration: float  = 6000.0
-@export var base_brake_strength: float       = 2500.0
-@export var base_lateral_strength: float     = 1200.0
-@export var base_max_speed: float            = 6000.0
+@export var base_thrust_acceleration: float  = 600.0
+@export var base_brake_strength: float       = 250.0
+@export var base_lateral_strength: float     = 120.0
+@export var base_max_speed: float            = 600.0
 @export var damping: float                   = 0
 @export var base_rotation_speed: float       = 8.0
 @export var base_fire_rate: float            = 0.2
-@export var base_max_health: int             = 50
+@export var base_max_health: int             = 5
 
 @export var shoot_shake_amount: float    = 2.0
 @export var shoot_shake_duration: float  = 0.08
@@ -218,10 +218,10 @@ func flash_damage() -> void:
 		sprite.modulate = Color.WHITE
 
 func spawn_damage_particles() -> void:
-	_make_burst(global_position, 18, 0.6, 130, 280, 2.5, 5.0, Color(1, 0.2, 0.2))
+	_make_burst(global_position, 18, 0.6, 20, 28, 2.5, 5.0, Color(1, 0.2, 0.2))
 
 func spawn_death_particles() -> void:
-	_make_burst(global_position, 45, 1.3, 200, 450, 4.0, 9.0, Color(1, 0.45, 0))
+	_make_burst(global_position, 45, 1.3, 30, 45, 4.0, 9.0, Color(1, 0.45, 0))
 
 func _make_burst(pos: Vector2, amount: int, lifetime: float,
 		vel_min: float, vel_max: float,

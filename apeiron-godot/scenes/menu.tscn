@@ -16,7 +16,6 @@ shader = ExtResource("3_usg53")
 
 [node name="Menu" type="Control"]
 layout_mode = 3
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -76,13 +75,13 @@ script = ExtResource("2_jj1jh")
 
 [node name="contenedor" type="VBoxContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
-anchor_top = 0.5
+anchor_top = 0.45800003
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -118.5
-offset_top = -80.5
+offset_top = 0.13995361
 offset_right = 118.5
 offset_bottom = 80.5
 grow_horizontal = 2

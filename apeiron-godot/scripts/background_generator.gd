@@ -1,11 +1,11 @@
 extends Node2D
 
-@export var star_count: int = 300
+@export var star_count: int = 400
 @export var star_speed_min: float = 1.0
-@export var star_speed_max: float = 500000.0
+@export var star_speed_max: float = 50000000000.0
 @export var star_size_min: float = 1.0
-@export var star_size_max: float = 3.0
-@export var spawn_distance: float = 1000.0
+@export var star_size_max: float = 5.0
+@export var spawn_distance: float = 4000.0
 
 var stars: Array = []
 var player: Node2D = null
